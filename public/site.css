@@ -1,0 +1,5 @@
+/* Show that the navbar is fixed to the top */
+body {
+  min-height: 75rem;
+  padding-top: 4.5rem;
+}
