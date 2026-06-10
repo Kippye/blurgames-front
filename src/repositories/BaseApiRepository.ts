@@ -5,7 +5,7 @@ import type { IResultObject } from '@/types/IResultObject';
 import type { IApiFetchOptions } from '@/types/IApiFetchOptions';
 import type { IAuthStore } from '@/domain/auth/IAuthStore';
 
-export abstract class BaseApiRepository<T> {
+export abstract class BaseApiRepository<TEntity, TCreate, TUpdate> {
   protected authStore: IAuthStore;
   protected router = useRouter();
   protected endpoint: string;
@@ -51,7 +51,7 @@ export abstract class BaseApiRepository<T> {
     return authInfo.jwt;
   }
 
-  protected async handleFetch<T>(options: IApiFetchOptions): Promise<IResultObject<T>> {
+  protected async handleFetch<TResult>(options: IApiFetchOptions): Promise<IResultObject<TResult>> {
     try {
       const res = await this.apiFetch(options);
       if (!res.ok) {
@@ -59,7 +59,7 @@ export abstract class BaseApiRepository<T> {
         return { errors: [err.getUserMessage()] };
       }
       if (res.status === 204) {
-        return { data: null as T };
+        return { data: null as TResult };
       }
       try {
         return { data: await res.json() };
@@ -73,17 +73,17 @@ export abstract class BaseApiRepository<T> {
     }
   }
 
-  async get(id: string): Promise<IResultObject<T>> {
+  async get(id: string): Promise<IResultObject<TEntity>> {
     const url = composeUrl({ endpoint: this.endpoint, id });
     return await this.handleFetch({ url });
   }
 
-  async getAll(): Promise<IResultObject<T[]>> {
+  async getAll(): Promise<IResultObject<TEntity[]>> {
     const url = composeUrl({ endpoint: this.endpoint + '/all' });
     return await this.handleFetch({ url });
   }
 
-  async add(item: T): Promise<IResultObject<T>> {
+  async add(item: TCreate): Promise<IResultObject<TEntity>> {
     const url = composeUrl({ endpoint: this.endpoint });
     const itemJson = JSON.stringify(item);
     return await this.handleFetch({
@@ -96,7 +96,7 @@ export abstract class BaseApiRepository<T> {
     });
   }
 
-  async update(id: string, item: T): Promise<IResultObject<T>> {
+  async update(id: string, item: TUpdate): Promise<IResultObject<TEntity>> {
     const url = composeUrl({ endpoint: this.endpoint, id });
     const itemJson = JSON.stringify(item);
     return await this.handleFetch({
@@ -109,7 +109,9 @@ export abstract class BaseApiRepository<T> {
     });
   }
 
-  async delete(id: string): Promise<IResultObject<T>> {
+  // TODO: Delete doesn't return an actual entity result
+  // So either make a non-generic IResultObject or use some other dummmy type
+  async delete(id: string): Promise<IResultObject<TEntity>> {
     const url = composeUrl({ endpoint: this.endpoint, id });
     return await this.handleFetch({ url, request: { method: 'DELETE' } });
   }

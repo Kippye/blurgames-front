@@ -22,5 +22,11 @@ export function useApi<T, Args extends readonly unknown[] = []>(
     isLoading.value = false;
   };
 
-  return { data, isLoading, error, execute };
+  const clear = () => {
+    isLoading.value = false;
+    error.value = null;
+    data.value = undefined;
+  };
+
+  return { data, isLoading, error, execute, clear };
 }
