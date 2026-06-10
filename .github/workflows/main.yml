@@ -1,0 +1,22 @@
+name: 'main'
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    name: Deploy
+
+# Gitlab
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  only:
+    - main
+  tags:
+    - shared
+  script:
+    - docker compose -p js-project down
+    - docker compose -p js-project up --build --remove-orphans --detach

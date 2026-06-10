@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth-store';
+import NavItem from './NavItem.vue';
 
 const authStore = useAuthStore();
-const { getAuthInfo, isLoggedIn } = authStore;
+const { getAuthInfo, isLoggedIn, getUserType } = authStore;
 
 function logOut() {
   authStore.logOut();
@@ -29,12 +30,28 @@ function logOut() {
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="headerNavbarCollapse">
-        <ul class="navbar-nav me-auto mb-md-0">
-          <li class="nav-item">
-            <RouterLink to="/" class="nav-link">Home</RouterLink>
-          </li>
+        <ul class="navbar-nav me mb-md-0">
+          <NavItem to="/">Home</NavItem>
+          <NavItem to="/games">Games</NavItem>
+          <NavItem to="/upload">Upload</NavItem>
         </ul>
         <ul class="navbar-nav ms-md-auto mb-2 mb-md-0">
+          <li v-if="getUserType() == 'admin'" class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Admin
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <RouterLink to="genres" class="dropdown-item"> Genres </RouterLink>
+              </li>
+            </ul>
+          </li>
           <li class="nav-item">
             <span class="nav-link">{{ getAuthInfo()?.userName }}</span>
           </li>
