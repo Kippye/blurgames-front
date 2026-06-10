@@ -5,6 +5,7 @@ import RegisterView from '@/views/RegisterView.vue';
 import MainView from '@/views/MainView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
+import GenreView from '@/views/admin/GenreView.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -26,6 +27,13 @@ const routes: RouteRecordRaw[] = [
     path: '/about',
     name: 'About',
     component: AboutView,
+  },
+  // ADMIN ROUTES
+  {
+    path: '/genres',
+    name: 'Genres',
+    component: GenreView,
+    meta: { requiresAuth: true, userType: 'admin' },
   },
   {
     path: '/:pathMatch(.*)*',
