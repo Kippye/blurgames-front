@@ -4,9 +4,11 @@ import type IProjectTypeCreate from '@/domain/projectType/IProjectTypeCreate';
 import { ProjectTypeRepository } from '@/repositories/ProjectTypeRepository';
 import { useAuthStore } from '@/stores/auth-store';
 import { useApi } from '@/composables/useApi';
+import { toSeparateWords } from '@/util/string-helpers';
 
-defineProps<{
+const props = defineProps<{
   modelValue: boolean;
+  entityName: string;
 }>();
 
 const emit = defineEmits<{
@@ -39,7 +41,7 @@ async function handleCreate() {
   await add(newItem);
 
   if (error.value) {
-    console.error('Failed to create projectType:', error.value);
+    console.error(`Failed to create ${props.entityName}:`, error.value);
     return;
   }
 
@@ -71,7 +73,9 @@ function resetForm() {
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addProjectTypeModalLabel">Add New Project Type</h5>
+          <h5 class="modal-title" id="addProjectTypeModalLabel">
+            Add New {{ toSeparateWords(entityName) }}
+          </h5>
           <button type="button" class="btn-close" @click="handleCancel" aria-label="Close"></button>
         </div>
         <div class="modal-body">

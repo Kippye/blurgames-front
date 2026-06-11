@@ -4,9 +4,11 @@ import type IProjectType from '@/domain/projectType/IProjectType';
 import { ProjectTypeRepository } from '@/repositories/ProjectTypeRepository';
 import { useAuthStore } from '@/stores/auth-store';
 import { useApi } from '@/composables/useApi';
+import { toSeparateWords } from '@/util/string-helpers';
 
 const props = defineProps<{
   modelValue: boolean;
+  entityName: string;
   projectType: IProjectType | null;
 }>();
 
@@ -47,7 +49,7 @@ async function handleUpdate() {
   await update(newItem);
 
   if (error.value) {
-    console.error('Failed to update projectType:', error.value);
+    console.error(`Failed to update ${props.entityName}:`, error.value);
     return;
   }
 
@@ -103,7 +105,9 @@ watch(
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="editProjectTypeModalLabel">Edit ProjectType</h5>
+          <h5 class="modal-title" id="editProjectTypeModalLabel">
+            Edit {{ toSeparateWords(entityName) }}
+          </h5>
           <button type="button" class="btn-close" @click="handleCancel" aria-label="Close"></button>
         </div>
         <div class="modal-body">

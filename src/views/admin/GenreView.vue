@@ -99,13 +99,19 @@ function handleDeleteModalClose() {
     <EditGenreModal
       v-model="showEditGenreModal"
       :genre="selectedGenre"
+      entity-name="Genre"
       @genre-updated="handleGenreUpdated"
       @update:model-value="handleEditModalClose"
     />
-    <AddGenreModal v-model="showAddGenreModal" @genre-created="handleGenreCreated" />
+    <AddGenreModal
+      v-model="showAddGenreModal"
+      entity-name="Genre"
+      @genre-created="handleGenreCreated"
+    />
     <DeleteGenreModal
       v-model="showDeleteGenreModal"
       :genre="genreToDelete"
+      entity-name="Genre"
       @genre-deleted="handleGenreDeleted"
       @update:model-value="handleDeleteModalClose"
     />

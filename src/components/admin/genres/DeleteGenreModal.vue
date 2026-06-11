@@ -4,9 +4,11 @@ import type IGenre from '@/domain/genre/IGenre';
 import { useAuthStore } from '@/stores/auth-store';
 import { GenreRepository } from '@/repositories/GenreRepository';
 import { useApi } from '@/composables/useApi';
+import { toSeparateWords } from '@/util/string-helpers';
 
 const props = defineProps<{
   modelValue: boolean;
+  entityName: string;
   genre: IGenre | null;
 }>();
 
@@ -33,7 +35,7 @@ async function handleDelete() {
   await executeDelete(props.genre!.id);
 
   if (error.value) {
-    console.error('Failed to delete genre:', error.value);
+    console.error(`Failed to delete ${props.entityName}:`, error.value);
     return;
   }
 
@@ -58,11 +60,15 @@ function handleCancel() {
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="deleteGenreModalLabel">Delete Genre</h5>
+          <h5 class="modal-title" id="deleteGenreModalLabel">Delete {{ entityName }}</h5>
           <button type="button" class="btn-close" @click="handleCancel" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p>Are you sure you want to delete the genre "{{ genre?.genreName }}"?</p>
+          <p>
+            Are you sure you want to delete the {{ toSeparateWords(entityName).toLowerCase() }} "{{
+              genre?.genreName
+            }}"?
+          </p>
           <p class="text-muted">This action cannot be undone.</p>
           <div v-if="error" class="alert alert-danger mt-3" role="alert">
             {{ error }}

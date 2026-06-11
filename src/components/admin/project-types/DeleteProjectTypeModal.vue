@@ -4,9 +4,11 @@ import type IProjectType from '@/domain/projectType/IProjectType';
 import { useAuthStore } from '@/stores/auth-store';
 import { ProjectTypeRepository } from '@/repositories/ProjectTypeRepository';
 import { useApi } from '@/composables/useApi';
+import { toSeparateWords } from '@/util/string-helpers';
 
 const props = defineProps<{
   modelValue: boolean;
+  entityName: string;
   projectType: IProjectType | null;
 }>();
 
@@ -33,7 +35,7 @@ async function handleDelete() {
   await executeDelete(props.projectType!.id);
 
   if (error.value) {
-    console.error('Failed to delete projectType:', error.value);
+    console.error(`Failed to delete ${props.entityName}:`, error.value);
     return;
   }
 
@@ -58,12 +60,16 @@ function handleCancel() {
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="deleteProjectTypeModalLabel">Delete Project Type</h5>
+          <h5 class="modal-title" id="deleteProjectTypeModalLabel">
+            Delete {{ toSeparateWords(entityName) }}
+          </h5>
           <button type="button" class="btn-close" @click="handleCancel" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <p>
-            Are you sure you want to delete the project type "{{ projectType?.projectTypeName }}"?
+            Are you sure you want to delete the {{ toSeparateWords(entityName).toLowerCase() }} "{{
+              projectType?.projectTypeName
+            }}"?
           </p>
           <p class="text-muted">This action cannot be undone.</p>
           <div v-if="error" class="alert alert-danger mt-3" role="alert">
