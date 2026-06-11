@@ -4,9 +4,9 @@ import { GenreRepository } from '@/repositories/GenreRepository';
 import { onMounted, ref } from 'vue';
 import { useApi } from '@/composables/useApi';
 import type IGenre from '@/domain/genre/IGenre';
-import EditGenreModal from '@/components/admin/EditGenreModal.vue';
-import AddGenreModal from '@/components/admin/AddGenreModal.vue';
-import DeleteGenreModal from '@/components/admin/DeleteGenreModal.vue';
+import EditGenreModal from '@/components/admin/genres/EditGenreModal.vue';
+import AddGenreModal from '@/components/admin/genres/AddGenreModal.vue';
+import DeleteGenreModal from '@/components/admin/genres/DeleteGenreModal.vue';
 
 const authStore = useAuthStore();
 const genreRepository = new GenreRepository(authStore);

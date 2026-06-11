@@ -6,6 +6,7 @@ import MainView from '@/views/MainView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import GenreView from '@/views/admin/GenreView.vue';
+import ProjectTypeView from '@/views/admin/ProjectTypeView.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -33,6 +34,12 @@ const routes: RouteRecordRaw[] = [
     path: '/genres',
     name: 'Genres',
     component: GenreView,
+    meta: { requiresAuth: true, userType: 'admin' },
+  },
+  {
+    path: '/project-types',
+    name: 'ProjectTypes',
+    component: ProjectTypeView,
     meta: { requiresAuth: true, userType: 'admin' },
   },
   {
