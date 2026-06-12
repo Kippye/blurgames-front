@@ -103,20 +103,17 @@ function handleDeleteModalClose() {
     <EditProjectTypeModal
       v-model="showEditProjectTypeModal"
       :projectType="selectedProjectType"
-      entity-name="ProjectType"
-      @projectType-updated="handleProjectTypeUpdated"
+      @project-type-updated="handleProjectTypeUpdated"
       @update:model-value="handleEditModalClose"
     />
     <AddProjectTypeModal
       v-model="showAddProjectTypeModal"
-      entity-name="ProjectType"
-      @projectType-created="handleProjectTypeCreated"
+      @project-type-created="handleProjectTypeCreated"
     />
     <DeleteProjectTypeModal
       v-model="showDeleteProjectTypeModal"
       :projectType="projectTypeToDelete"
-      entity-name="ProjectType"
-      @projectType-deleted="handleProjectTypeDeleted"
+      @project-type-deleted="handleProjectTypeDeleted"
       @update:model-value="handleDeleteModalClose"
     />
   </div>

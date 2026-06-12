@@ -4,8 +4,14 @@ import { useRouter } from 'vue-router';
 import type { IResultObject } from '@/types/IResultObject';
 import type { IApiFetchOptions } from '@/types/IApiFetchOptions';
 import type { IAuthStore } from '@/domain/auth/IAuthStore';
+import type { IApiErrorResponse } from '@/types/IApiErrorResponse';
+import type { IBaseEntity } from '@/domain/IBaseEntity';
 
-export abstract class BaseApiRepository<TEntity, TCreate, TUpdate> {
+export abstract class BaseApiRepository<
+  TEntity extends IBaseEntity,
+  TCreate,
+  TUpdate extends IBaseEntity,
+> {
   protected authStore: IAuthStore;
   protected router = useRouter();
   protected endpoint: string;
@@ -54,17 +60,31 @@ export abstract class BaseApiRepository<TEntity, TCreate, TUpdate> {
   protected async handleFetch<TResult>(options: IApiFetchOptions): Promise<IResultObject<TResult>> {
     try {
       const res = await this.apiFetch(options);
-      if (!res.ok) {
-        const err = await HttpError.fromResponse(res);
-        return { errors: [err.getUserMessage()] };
-      }
+
+      // No content
       if (res.status === 204) {
         return { data: null as TResult };
       }
-      try {
-        return { data: await res.json() };
-      } catch {
-        return { errors: ['Invalid response from server.'] };
+      // Success or user error
+      if (res.ok || (400 <= res.status && res.status <= 499)) {
+        try {
+          // Success -> res.json() as data
+          if (res.ok) {
+            return { data: await res.json() };
+          }
+          // User error -> res.json() as error
+          else {
+            const apiError: IApiErrorResponse = await res.json();
+            return { errors: [apiError.error] };
+          }
+        } catch {
+          return { errors: ['Invalid response from server.'] };
+        }
+      }
+      // Server error or other unexpected thing -> HTTP error message
+      else {
+        const err = await HttpError.fromResponse(res);
+        return { errors: [err.getUserMessage()] };
       }
     } catch (error) {
       let message = 'Unknown fetch error';
@@ -96,8 +116,8 @@ export abstract class BaseApiRepository<TEntity, TCreate, TUpdate> {
     });
   }
 
-  async update(id: string, item: TUpdate): Promise<IResultObject<TEntity>> {
-    const url = composeUrl({ endpoint: this.endpoint, id });
+  async update(item: TUpdate): Promise<IResultObject<TEntity>> {
+    const url = composeUrl({ endpoint: this.endpoint, id: item.id });
     const itemJson = JSON.stringify(item);
     return await this.handleFetch({
       url,

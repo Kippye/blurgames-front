@@ -1,5 +1,6 @@
-export default interface IProjectType {
-  id: string;
+import type { IBaseEntity } from '../IBaseEntity';
+
+export default interface IProjectType extends IBaseEntity {
   projectTypeName: string;
   projectTypeDescription: string;
 }
