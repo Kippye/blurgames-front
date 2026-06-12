@@ -15,7 +15,7 @@ function logOut() {
 </script>
 
 <template>
-  <nav v-if="isLoggedIn()" class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <nav v-if="isLoggedIn()" class="navbar navbar-expand-md navbar-dark fixed-top">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">Blurgames</a>
       <button
@@ -76,4 +76,12 @@ function logOut() {
   </nav>
 </template>
 
-<style scoped></style>
+<style scoped>
+.navbar {
+  background-color: #a6c5e1;
+}
+
+.nav-link {
+  --bs-nav-link-color: rgba(10, 10, 10, 0.75);
+}
+</style>
