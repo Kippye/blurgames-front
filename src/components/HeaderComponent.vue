@@ -48,6 +48,9 @@ function logOut() {
             </a>
             <ul class="dropdown-menu">
               <li>
+                <RouterLink to="/author-roles" class="dropdown-item"> Author Roles </RouterLink>
+              </li>
+              <li>
                 <RouterLink to="/genres" class="dropdown-item"> Genres </RouterLink>
               </li>
               <li>

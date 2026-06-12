@@ -7,6 +7,7 @@ import NotFoundView from '@/views/NotFoundView.vue';
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import GenreView from '@/views/admin/GenreView.vue';
 import ProjectTypeView from '@/views/admin/ProjectTypeView.vue';
+import AuthorRoleView from '@/views/admin/AuthorRoleView.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -30,6 +31,12 @@ const routes: RouteRecordRaw[] = [
     component: AboutView,
   },
   // ADMIN ROUTES
+  {
+    path: '/author-roles',
+    name: 'AuthorRoles',
+    component: AuthorRoleView,
+    meta: { requiresAuth: true, userType: 'admin' },
+  },
   {
     path: '/genres',
     name: 'Genres',
