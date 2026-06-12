@@ -8,6 +8,7 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import GenreView from '@/views/admin/GenreView.vue';
 import ProjectTypeView from '@/views/admin/ProjectTypeView.vue';
 import AuthorRoleView from '@/views/admin/AuthorRoleView.vue';
+import TagView from '@/views/admin/TagView.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -49,6 +50,13 @@ const routes: RouteRecordRaw[] = [
     component: ProjectTypeView,
     meta: { requiresAuth: true, userType: 'admin' },
   },
+  {
+    path: '/tags',
+    name: 'Tags',
+    component: TagView,
+    meta: { requiresAuth: true, userType: 'admin' },
+  },
+  // ERROR ROUTES
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',

@@ -56,6 +56,9 @@ function logOut() {
               <li>
                 <RouterLink to="/project-types" class="dropdown-item"> Project Types </RouterLink>
               </li>
+              <li>
+                <RouterLink to="/tags" class="dropdown-item"> Tags </RouterLink>
+              </li>
             </ul>
           </li>
           <li class="nav-item">
