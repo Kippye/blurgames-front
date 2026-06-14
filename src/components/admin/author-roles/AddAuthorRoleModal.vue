@@ -2,6 +2,7 @@
 import { AuthorRoleRepository } from '@/repositories/AuthorRoleRepository';
 import { useAuthStore } from '@/stores/auth-store';
 import AddModal from '@/components/AddModal.vue';
+import FormElement from '@/components/FormElement.vue';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -29,17 +30,18 @@ const validateForm = (formData: Record<string, string>) =>
     @entity-created="emit('author-role-created')"
   >
     <template #form-fields="{ updateData, formData }">
-      <div class="mb-3">
-        <label for="authorRoleName" class="form-label">Name *</label>
-        <input
-          type="text"
-          class="form-control"
-          id="authorRoleName"
-          :value="formData.authorRoleName"
-          @input="updateData('authorRoleName', ($event.target as HTMLInputElement).value)"
-          required
-        />
-      </div>
+      <FormElement id="authorRoleName" label="Name" required>
+        <template #default="{ form }">
+          <input
+            type="text"
+            class="form-control"
+            :id="form.id"
+            :value="formData.authorRoleName"
+            @input="updateData('authorRoleName', ($event.target as HTMLInputElement).value)"
+            :required="form.required"
+          />
+        </template>
+      </FormElement>
     </template>
   </AddModal>
 </template>

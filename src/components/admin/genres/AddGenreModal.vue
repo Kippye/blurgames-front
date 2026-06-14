@@ -2,6 +2,7 @@
 import { GenreRepository } from '@/repositories/GenreRepository';
 import { useAuthStore } from '@/stores/auth-store';
 import AddModal from '@/components/AddModal.vue';
+import FormElement from '@/components/FormElement.vue';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -29,28 +30,31 @@ const validateForm = (formData: Record<string, string>) =>
     @entity-created="emit('genre-created')"
   >
     <template #form-fields="{ updateData, formData }">
-      <div class="mb-3">
-        <label for="genreName" class="form-label">Name *</label>
-        <input
-          type="text"
-          class="form-control"
-          id="genreName"
-          :value="formData.genreName"
-          @input="updateData('genreName', ($event.target as HTMLInputElement).value)"
-          required
-        />
-      </div>
+      <FormElement id="genreName" label="Name" required>
+        <template #default="{ form }">
+          <input
+            type="text"
+            class="form-control"
+            :id="form.id"
+            :value="formData.genreName"
+            @input="updateData('genreName', ($event.target as HTMLInputElement).value)"
+            :required="form.required"
+          />
+        </template>
+      </FormElement>
 
-      <div class="mb-3">
-        <label for="genreDescription" class="form-label">Description</label>
-        <textarea
-          class="form-control"
-          id="genreDescription"
-          :value="formData.genreDescription"
-          @input="updateData('genreDescription', ($event.target as HTMLTextAreaElement).value)"
-        >
-        </textarea>
-      </div>
+      <FormElement id="genreDescription" label="Description">
+        <template #default="{ form }">
+          <textarea
+            class="form-control"
+            :id="form.id"
+            :value="formData.genreDescription"
+            @input="updateData('genreDescription', ($event.target as HTMLTextAreaElement).value)"
+            :required="form.required"
+          >
+          </textarea>
+        </template>
+      </FormElement>
     </template>
   </AddModal>
 </template>

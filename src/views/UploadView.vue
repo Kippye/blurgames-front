@@ -123,15 +123,17 @@ function resetForm() {
     <h1 class="page-title">Upload Project</h1>
     <div class="body">
       <form @submit.prevent="handleUpload">
-        <FormElement id="projectTitle" label="Title (70)" required>
-          <input
-            type="text"
-            class="form-control"
-            id="projectTitle"
-            v-model="title"
-            required
-            maxlength="70"
-          />
+        <FormElement id="projectTitle" label="Title" maxlength="70" required>
+          <template #default="{ form }">
+            <input
+              type="text"
+              class="form-control"
+              v-model="title"
+              :id="form.id"
+              :maxlength="form.maxlength"
+              :required="form.required"
+            />
+          </template>
         </FormElement>
         <FormElement id="projectType" label="Project Type" required>
           <select id="projectType" v-model="projectTypeId" class="form-select" required>
@@ -151,8 +153,8 @@ function resetForm() {
         >
           <select
             id="relatedProject"
-            v-model="relatedProjectId"
             class="form-select"
+            v-model="relatedProjectId"
             :required="selectedProjectType?.projectTypeName == 'Modification' ? true : undefined"
           >
             <option value=""></option>
@@ -166,18 +168,29 @@ function resetForm() {
           </select>
         </FormElement>
         <!-- TODO: Authors section 💀 -->
-        <FormElement id="shortDescription" label="Short Description (60)">
-          <input
-            type="text"
-            class="form-control"
-            id="shortDescription"
-            v-model="shortDescription"
-            maxlength="60"
-          />
+        <FormElement id="shortDescription" label="Short Description" maxlength="60">
+          <template #default="{ form }">
+            <input
+              type="text"
+              class="form-control"
+              v-model="shortDescription"
+              :id="form.id"
+              :maxlength="form.maxlength"
+              :required="form.required"
+            />
+          </template>
         </FormElement>
-        <FormElement id="description" label="Description (1000)">
-          <textarea class="form-control" id="description" v-model="description" maxlength="1000">
-          </textarea>
+        <FormElement id="description" label="Description" maxlength="1000">
+          <template #default="{ form }">
+            <textarea
+              class="form-control"
+              v-model="description"
+              :id="form.id"
+              :maxlength="form.id"
+              :required="form.required"
+            >
+            </textarea>
+          </template>
         </FormElement>
         <FormElement id="genres" label="Genres">
           <MultiselectSearchDropdown

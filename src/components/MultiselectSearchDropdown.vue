@@ -137,7 +137,7 @@ onBeforeUnmount(() => {
           type="text"
           class="form-control"
           v-model="searchQuery"
-          placeholder="Search items..."
+          placeholder="Search..."
           @focus="showDropdown = true"
           @keydown="handleKeyDown"
           @keyup.enter="addFirstFilteredItem"

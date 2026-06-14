@@ -3,6 +3,7 @@ import type IProjectType from '@/domain/projectType/IProjectType';
 import { ProjectTypeRepository } from '@/repositories/ProjectTypeRepository';
 import { useAuthStore } from '@/stores/auth-store';
 import EditModal from '@/components/EditModal.vue';
+import FormElement from '@/components/FormElement.vue';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -34,30 +35,33 @@ const validateForm = (formData: Record<string, string>) =>
     @entity-updated="emit('project-type-updated')"
   >
     <template #form-fields="{ updateData, formData }">
-      <div class="mb-3">
-        <label for="projectTypeName" class="form-label">Name *</label>
-        <input
-          type="text"
-          class="form-control"
-          id="projectTypeName"
-          :value="formData.projectTypeName"
-          @input="updateData('projectTypeName', ($event.target as HTMLInputElement).value)"
-          required
-        />
-      </div>
+      <FormElement id="projectTypeName" label="Name" required>
+        <template #default="{ form }">
+          <input
+            type="text"
+            class="form-control"
+            :id="form.id"
+            :value="formData.projectTypeName"
+            @input="updateData('projectTypeName', ($event.target as HTMLInputElement).value)"
+            :required="form.required"
+          />
+        </template>
+      </FormElement>
 
-      <div class="mb-3">
-        <label for="projectTypeDescription" class="form-label">Description</label>
-        <textarea
-          class="form-control"
-          id="projectTypeDescription"
-          :value="formData.projectTypeDescription"
-          @input="
-            updateData('projectTypeDescription', ($event.target as HTMLTextAreaElement).value)
-          "
-        >
-        </textarea>
-      </div>
+      <FormElement id="projectTypeDescription" label="Description">
+        <template #default="{ form }">
+          <textarea
+            class="form-control"
+            :id="form.id"
+            :value="formData.projectTypeDescription"
+            @input="
+              updateData('projectTypeDescription', ($event.target as HTMLTextAreaElement).value)
+            "
+            :required="form.required"
+          >
+          </textarea>
+        </template>
+      </FormElement>
     </template>
   </EditModal>
 </template>

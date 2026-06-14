@@ -2,6 +2,7 @@
 const props = defineProps<{
   id: string;
   label: string;
+  maxlength?: string;
   required?: boolean;
 }>();
 console.log(props.label, props.required ?? 'undefined');
@@ -9,7 +10,11 @@ console.log(props.label, props.required ?? 'undefined');
 
 <template>
   <div class="mb-3">
-    <label :for="id" class="form-label">{{ `${label}${required ? ' *' : ''}` }}</label>
-    <slot></slot>
+    <label :for="id" class="form-label">
+      {{ label }}
+      <span v-if="maxlength" class="text-muted">({{ maxlength }})</span>
+      <span v-if="required" class="text-primary">*</span></label
+    >
+    <slot :form="{ id, required, maxlength }"></slot>
   </div>
 </template>
