@@ -9,17 +9,24 @@ import type IProjectDetails from '@/domain/projectDetails/IProjectDetails';
 import type IGenre from '@/domain/genre/IGenre';
 import MultiselectSearchDropdown from '@/components/MultiselectSearchDropdown.vue';
 import type ITag from '@/domain/tag/ITag';
+import { useAuthStore } from '@/stores/auth-store';
+import { ProjectRepository } from '@/repositories/ProjectRepository';
+import type IProjectUpload from '@/domain/aggregate/IProjectUpload';
+
+const authStore = useAuthStore();
+const projectRepo = new ProjectRepository(authStore);
 
 const {
-  error,
+  isLoading: isUploading,
+  data: uploadResult,
+  error: uploadError,
   execute: upload,
   clear: clearUploadResult,
-} = useApi(() => {
-  console.log('Created!');
-  const getMockResponse = async (): Promise<IResultObject<boolean>> => {
-    return { errors: [] };
-  };
-  return getMockResponse();
+} = useApi((upload: IProjectUpload) => {
+  console.log('Uploading...');
+  return new Promise<IResultObject<IProject>>((res) => {
+    setTimeout(() => res({ data: { ...upload.project, id: '3', appUserId: '2' } }), 2000);
+  });
 });
 
 // Mock data
@@ -59,7 +66,7 @@ interface IProjectWithDetails extends IProject, IProjectDetails {}
 
 // Project
 const projectTypeId = ref<string>(projectTypeData[0]!.id);
-const relatedProjectId = ref<string | null>(null);
+const relatedProjectId = ref<string>();
 /// Authors
 // TODO
 // Project details
@@ -84,7 +91,15 @@ const projectsWithDetails = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return true;
+  return (
+    projectTypeId.value != undefined &&
+    (selectedProjectType.value?.projectTypeName != 'Modification' ||
+      relatedProjectId.value != undefined) &&
+    0 < title.value.length &&
+    title.value.length <= 100 &&
+    shortDescription.value.length <= 60 &&
+    description.value.length <= 1000
+  );
 });
 
 async function handleUpload() {
@@ -92,21 +107,37 @@ async function handleUpload() {
     return;
   }
 
-  await upload();
+  const projectUpload: IProjectUpload = {
+    project: {
+      projectTypeId: projectTypeId.value,
+      relatedProjectId: relatedProjectId.value,
+    },
+    projectDetails: {
+      title: title.value,
+      shortDescription: shortDescription.value,
+      description: description.value,
+    },
+    authors: [],
+  };
 
-  if (error.value) {
-    console.error(`Failed to upload:`, error.value);
+  await upload(projectUpload);
+
+  if (uploadError.value) {
+    console.error(`Failed to upload:`, uploadError.value);
     return;
   }
 
+  console.log(uploadResult.value);
+
   // TODO: Redirect to the project's page
+  // router.push(`/project/${uploadResult.id}`);
   // And then the whole resetForm function might become unnecessary
   resetForm();
 }
 
 function resetForm() {
   projectTypeId.value = projectTypeData[0]!.id;
-  relatedProjectId.value = null;
+  relatedProjectId.value = undefined;
 
   title.value = '';
   shortDescription.value = '';
@@ -211,13 +242,24 @@ function resetForm() {
           </MultiselectSearchDropdown>
         </FormElement>
       </form>
-      <div v-if="error" class="alert alert-danger mt-3" role="alert">
-        {{ error }}
+      <div v-if="uploadError" class="alert alert-danger mt-3" role="alert">
+        {{ uploadError }}
       </div>
     </div>
     <div class="footer">
-      <button type="button" class="btn btn-primary" @click="handleUpload" :disabled="!isFormValid">
-        Upload
+      <button
+        type="button"
+        class="btn btn-primary"
+        @click="handleUpload"
+        :disabled="!isFormValid || isUploading"
+      >
+        <span
+          v-if="isUploading"
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        {{ isUploading ? 'Uploading...' : 'Upload' }}
       </button>
     </div>
   </div>
