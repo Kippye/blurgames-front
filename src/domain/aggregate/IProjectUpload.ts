@@ -1,18 +1,30 @@
-import type IAuthorCreate from '../author/IAuthorCreate';
 import type IProjectCreate from '../project/IProjectCreate';
 import type IProjectDetailsCreate from '../projectDetails/IProjectDetailsCreate';
 
 export interface IProjectAuthor {
   // Existing author
-  authorId?: string;
-  // OR author to be created
-  newAuthor?: IAuthorCreate;
+  id?: string;
+  // OR name of new author
+  name?: string;
+  isNewAuthor: boolean;
   // Roles that the author has in this project
   roleIds: string[];
+}
+
+// TODO: These will likely be separate entities soon (with full info)
+// So these might have to be named Upload entities as well
+export interface IProjectDetailsGenre {
+  genreId: string;
+}
+
+export interface IProjectDetailsTag {
+  tagId: string;
 }
 
 export default interface IProjectUpload {
   project: IProjectCreate;
   projectDetails: Omit<IProjectDetailsCreate, 'projectId'>;
   authors: IProjectAuthor[];
+  genres: IProjectDetailsGenre[];
+  tags: IProjectDetailsTag[];
 }

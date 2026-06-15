@@ -1,11 +1,10 @@
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   id: string;
   label: string;
   maxlength?: string;
   required?: boolean;
 }>();
-console.log(props.label, props.required ?? 'undefined');
 </script>
 
 <template>

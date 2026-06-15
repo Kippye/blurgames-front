@@ -12,6 +12,10 @@ import type ITag from '@/domain/tag/ITag';
 import { useAuthStore } from '@/stores/auth-store';
 import { ProjectRepository } from '@/repositories/ProjectRepository';
 import type IProjectUpload from '@/domain/aggregate/IProjectUpload';
+import type IAuthor from '@/domain/author/IAuthor';
+import type IAuthorRole from '@/domain/authorRole/IAuthorRole';
+import type { IProjectAuthor } from '@/domain/aggregate/IProjectUpload';
+import ComboboxWithCreate from '@/components/ComboboxWithCreate.vue';
 
 const authStore = useAuthStore();
 const projectRepo = new ProjectRepository(authStore);
@@ -22,11 +26,16 @@ const {
   error: uploadError,
   execute: upload,
   clear: clearUploadResult,
-} = useApi((upload: IProjectUpload) => {
-  console.log('Uploading...');
-  return new Promise<IResultObject<IProject>>((res) => {
-    setTimeout(() => res({ data: { ...upload.project, id: '3', appUserId: '2' } }), 2000);
-  });
+} = useApi(async (upload: IProjectUpload) => {
+  console.log('Uploading: ', JSON.stringify(upload, undefined, 2));
+  const uploadResult = await projectRepo.add(upload);
+  if (uploadResult.errors) {
+    // TEMP to test without back-end
+    return new Promise<IResultObject<IProject>>((res) => {
+      setTimeout(() => res({ data: { ...upload.project, id: '3', appUserId: '2' } }), 2000);
+    });
+  }
+  return uploadResult;
 });
 
 // Mock data
@@ -38,6 +47,19 @@ const projectTypeData: IProjectType[] = [
 const projectData: IProject[] = [
   { id: '1', projectTypeId: '1', appUserId: '1' },
   { id: '2', projectTypeId: '2', appUserId: '2' },
+];
+
+const authorsData: IAuthor[] = [
+  { id: '1', name: 'zmateusz' },
+  { id: '2', name: 'kip', appUserId: '1' },
+];
+
+const authorRolesData: IAuthorRole[] = [
+  { id: '1', authorRoleName: 'Programmer' },
+  { id: '2', authorRoleName: 'Artist' },
+  { id: '3', authorRoleName: 'Tester' },
+  { id: '4', authorRoleName: 'Composer' },
+  { id: '5', authorRoleName: 'Designer' },
 ];
 
 const projectDetailsData: IProjectDetails[] = [
@@ -67,14 +89,6 @@ interface IProjectWithDetails extends IProject, IProjectDetails {}
 // Project
 const projectTypeId = ref<string>(projectTypeData[0]!.id);
 const relatedProjectId = ref<string>();
-/// Authors
-// TODO
-// Project details
-const title = ref<string>('');
-const shortDescription = ref<string>('');
-const description = ref<string>('');
-const selectedGenreIds = ref<string[]>([]);
-const selectedTagIds = ref<string[]>([]);
 
 const selectedProjectType = computed(() => {
   return projectTypeData.find((value: IProjectType) => value.id === projectTypeId.value);
@@ -89,6 +103,35 @@ const projectsWithDetails = computed(() => {
     return projectWithDetails;
   });
 });
+// Authors
+const selectedAuthors = ref<IProjectAuthor[]>([]);
+
+function handleAuthorSelect(selection: { id?: string; name: string; isNew: boolean }) {
+  // Check if author already exists in the list
+  if (selectedAuthors.value.find((a) => a.name?.toLowerCase() === selection.name.toLowerCase())) {
+    // Don't add duplicates
+    return;
+  }
+
+  const newAuthor: IProjectAuthor = {
+    id: selection.id,
+    name: selection.name,
+    isNewAuthor: selection.isNew,
+    roleIds: [],
+  };
+
+  selectedAuthors.value.push(newAuthor);
+}
+
+function removeAuthor(authorName: string) {
+  selectedAuthors.value = selectedAuthors.value.filter((a) => a.name !== authorName);
+}
+// Project details
+const title = ref<string>('');
+const shortDescription = ref<string>('');
+const description = ref<string>('');
+const selectedGenreIds = ref<string[]>([]);
+const selectedTagIds = ref<string[]>([]);
 
 const isFormValid = computed(() => {
   return (
@@ -117,7 +160,9 @@ async function handleUpload() {
       shortDescription: shortDescription.value,
       description: description.value,
     },
-    authors: [],
+    authors: selectedAuthors.value,
+    genres: selectedGenreIds.value.map((id) => ({ genreId: id })),
+    tags: selectedTagIds.value.map((id) => ({ tagId: id })),
   };
 
   await upload(projectUpload);
@@ -127,25 +172,9 @@ async function handleUpload() {
     return;
   }
 
-  console.log(uploadResult.value);
-
   // TODO: Redirect to the project's page
+  // (or maybe the server could send a Redirect response? I don't think REST APIs do that tho)
   // router.push(`/project/${uploadResult.id}`);
-  // And then the whole resetForm function might become unnecessary
-  resetForm();
-}
-
-function resetForm() {
-  projectTypeId.value = projectTypeData[0]!.id;
-  relatedProjectId.value = undefined;
-
-  title.value = '';
-  shortDescription.value = '';
-  description.value = '';
-  selectedGenreIds.value = [];
-  selectedTagIds.value = [];
-
-  clearUploadResult();
 }
 </script>
 
@@ -198,7 +227,59 @@ function resetForm() {
             </option>
           </select>
         </FormElement>
-        <!-- TODO: Authors section 💀 -->
+        <FormElement id="authors" label="Authors">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Author</th>
+                <th>Roles</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="author in selectedAuthors" :key="author.name!">
+                <td>
+                  <div class="d-flex align-items-center">
+                    <span>{{ author.name }}</span>
+                    <span v-if="author.isNewAuthor" class="badge bg-warning text-dark ms-2"
+                      >NEW</span
+                    >
+                  </div>
+                </td>
+                <td>
+                  <MultiselectSearchDropdown
+                    v-model="author.roleIds"
+                    :items="authorRolesData"
+                    name-property="authorRoleName"
+                    placeholder="Search roles..."
+                  >
+                  </MultiselectSearchDropdown>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn-close ms-1"
+                    @click="removeAuthor(author.name!)"
+                    aria-label="Remove author"
+                  ></button>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3">
+                  <ComboboxWithCreate
+                    :items="authorsData"
+                    :existing-names="selectedAuthors.map((a) => a.name!)"
+                    name-property="name"
+                    placeholder="Search authors or type to add new..."
+                    @select="handleAuthorSelect"
+                  />
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </FormElement>
         <FormElement id="shortDescription" label="Short Description" maxlength="60">
           <template #default="{ form }">
             <input
@@ -264,5 +345,3 @@ function resetForm() {
     </div>
   </div>
 </template>
-
-<style scoped></style>

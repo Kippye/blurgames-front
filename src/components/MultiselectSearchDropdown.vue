@@ -6,9 +6,13 @@ interface IDropdownProps {
   items: T[];
   nameProperty: keyof T;
   descriptionProperty?: keyof T;
+  placeholder?: string;
+  hidePills?: boolean;
 }
 
-const props = defineProps<IDropdownProps>();
+const props = withDefaults(defineProps<IDropdownProps>(), {
+  placeholder: 'Search...',
+});
 
 const selectedItemIds = defineModel<string[]>({ default: () => [] });
 const searchQuery = ref<string>('');
@@ -113,7 +117,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="item-selection">
     <!-- Selected items pills -->
-    <div class="selected-items mb-2">
+    <div v-if="!hidePills" class="selected-items mb-2">
       <span
         v-for="itemId in selectedItemIds"
         :key="itemId"
@@ -137,7 +141,7 @@ onBeforeUnmount(() => {
           type="text"
           class="form-control"
           v-model="searchQuery"
-          placeholder="Search..."
+          :placeholder="placeholder"
           @focus="showDropdown = true"
           @keydown="handleKeyDown"
           @keyup.enter="addFirstFilteredItem"
