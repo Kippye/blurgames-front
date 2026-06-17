@@ -15,10 +15,12 @@ export interface IProjectAuthor {
 // So these might have to be named Upload entities as well
 export interface IProjectDetailsGenre {
   genreId: string;
+  orderIndex: number;
 }
 
 export interface IProjectDetailsTag {
   tagId: string;
+  orderIndex: number;
 }
 
 export default interface IProjectUpload {

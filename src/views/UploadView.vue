@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import type { IResultObject } from '@/types/IResultObject';
 import { useApi } from '@/composables/useApi';
 import type IProjectType from '@/domain/projectType/IProjectType';
@@ -16,9 +16,84 @@ import type IAuthor from '@/domain/author/IAuthor';
 import type IAuthorRole from '@/domain/authorRole/IAuthorRole';
 import type { IProjectAuthor } from '@/domain/aggregate/IProjectUpload';
 import ComboboxWithCreate from '@/components/ComboboxWithCreate.vue';
+import { ProjectTypeRepository } from '@/repositories/ProjectTypeRepository';
+import { AuthorRoleRepository } from '@/repositories/AuthorRoleRepository';
+import { GenreRepository } from '@/repositories/GenreRepository';
+import { TagRepository } from '@/repositories/TagRepository';
+import { AuthorRepository } from '@/repositories/AuthorRepository';
+import { ProjectDetailsRepository } from '@/repositories/ProjectDetailsRepository';
 
 const authStore = useAuthStore();
 const projectRepo = new ProjectRepository(authStore);
+const projectDetailsRepo = new ProjectDetailsRepository(authStore);
+const projectTypeRepo = new ProjectTypeRepository(authStore);
+const authorRepo = new AuthorRepository(authStore);
+const authorRoleRepo = new AuthorRoleRepository(authStore);
+const genreRepo = new GenreRepository(authStore);
+const tagRepo = new TagRepository(authStore);
+
+// Data
+interface IFormData {
+  projects: IProject[];
+  projectDetails: IProjectDetails[];
+  projectTypes: IProjectType[];
+  authors: IAuthor[];
+  authorRoles: IAuthorRole[];
+  genres: IGenre[];
+  tags: ITag[];
+}
+
+const {
+  isLoading,
+  data,
+  error: formDataError,
+  execute: loadFormData,
+} = useApi(async (): Promise<IResultObject<IFormData>> => {
+  // TODO: Might be better to merge these into one big request?
+  const [
+    projectResult,
+    projectDetailsResult,
+    projectTypesResult,
+    authorsResult,
+    authorRolesResult,
+    genresResult,
+    tagsResult,
+  ] = await Promise.all([
+    projectRepo.getAll(),
+    projectDetailsRepo.getAll(),
+    projectTypeRepo.getAll(),
+    authorRepo.getAll(),
+    authorRoleRepo.getAll(),
+    genreRepo.getAll(),
+    tagRepo.getAll(),
+  ]);
+
+  const allErrors = new Set<string>([
+    ...(projectResult.errors ?? []),
+    ...(projectDetailsResult.errors ?? []),
+    ...(projectTypesResult.errors ?? []),
+    ...(authorsResult.errors ?? []),
+    ...(authorRolesResult.errors ?? []),
+    ...(genresResult.errors ?? []),
+    ...(tagsResult.errors ?? []),
+  ]);
+
+  if (allErrors.size > 0) {
+    return { errors: Array.from(allErrors) };
+  }
+
+  return {
+    data: {
+      projects: projectResult.data ?? [],
+      projectDetails: projectDetailsResult.data ?? [],
+      projectTypes: projectTypesResult.data ?? [],
+      authors: authorsResult.data ?? [],
+      authorRoles: authorRolesResult.data ?? [],
+      genres: genresResult.data ?? [],
+      tags: tagsResult.data ?? [],
+    },
+  };
+});
 
 const {
   isLoading: isUploading,
@@ -27,8 +102,7 @@ const {
   execute: upload,
   clear: clearUploadResult,
 } = useApi(async (upload: IProjectUpload) => {
-  console.log('Uploading: ', JSON.stringify(upload, undefined, 2));
-  const uploadResult = await projectRepo.add(upload);
+  const uploadResult = await projectRepo.upload(upload);
   if (uploadResult.errors) {
     // TEMP to test without back-end
     return new Promise<IResultObject<IProject>>((res) => {
@@ -38,66 +112,20 @@ const {
   return uploadResult;
 });
 
-// Mock data
-const projectTypeData: IProjectType[] = [
-  { id: '1', projectTypeName: 'Game', projectTypeDescription: 'Game' },
-  { id: '2', projectTypeName: 'Modification', projectTypeDescription: 'Modification' },
-];
-
-const projectData: IProject[] = [
-  { id: '1', projectTypeId: '1', appUserId: '1' },
-  { id: '2', projectTypeId: '2', appUserId: '2' },
-];
-
-const authorsData: IAuthor[] = [
-  { id: '1', name: 'zmateusz' },
-  { id: '2', name: 'kip', appUserId: '1' },
-];
-
-const authorRolesData: IAuthorRole[] = [
-  { id: '1', authorRoleName: 'Programmer' },
-  { id: '2', authorRoleName: 'Artist' },
-  { id: '3', authorRoleName: 'Tester' },
-  { id: '4', authorRoleName: 'Composer' },
-  { id: '5', authorRoleName: 'Designer' },
-];
-
-const projectDetailsData: IProjectDetails[] = [
-  { id: '1', projectId: '1', title: 'Cool game', shortDescription: '', description: '' },
-  { id: '2', projectId: '2', title: 'Mod of cool game', shortDescription: '', description: '' },
-];
-
-const genresData: IGenre[] = [
-  { id: '1', genreName: 'Action', genreDescription: 'Explosions and stuff' },
-  {
-    id: '2',
-    genreName: 'Activity',
-    genreDescription:
-      'This shall be a string of text a hundred characters long acting as a placeholder for testing purposes',
-  },
-  { id: '3', genreName: 'Platformer', genreDescription: 'Jumping around on platforms' },
-];
-
-const tagsData: ITag[] = [
-  { id: '1', tagName: 'cool', tagDescription: 'Very cool' },
-  { id: '2', tagName: 'awesome', tagDescription: 'Much awesome' },
-  { id: '3', tagName: 'Stupid Game Jam 2026', tagDescription: 'Kinda lame' },
-];
-
-interface IProjectWithDetails extends IProject, IProjectDetails {}
-
 // Project
-const projectTypeId = ref<string>(projectTypeData[0]!.id);
+const projectTypeId = ref<string>();
 const relatedProjectId = ref<string>();
 
 const selectedProjectType = computed(() => {
-  return projectTypeData.find((value: IProjectType) => value.id === projectTypeId.value);
+  return data.value?.projectTypes.find((value: IProjectType) => value.id === projectTypeId.value);
 });
 
+interface IProjectWithDetails extends IProject, IProjectDetails {}
+
 const projectsWithDetails = computed(() => {
-  return projectDetailsData.map((projectDetails) => {
+  return data.value?.projectDetails.map((projectDetails) => {
     const projectWithDetails: IProjectWithDetails = {
-      ...projectData.find((project) => project.id == projectDetails.projectId)!,
+      ...data.value!.projects.find((project) => project.id == projectDetails.projectId)!,
       ...projectDetails,
     };
     return projectWithDetails;
@@ -135,9 +163,9 @@ const selectedTagIds = ref<string[]>([]);
 
 const isFormValid = computed(() => {
   return (
-    projectTypeId.value != undefined &&
-    (selectedProjectType.value?.projectTypeName != 'Modification' ||
-      relatedProjectId.value != undefined) &&
+    projectTypeId.value !== undefined &&
+    (selectedProjectType.value?.projectTypeName !== 'Modification' ||
+      relatedProjectId.value !== undefined) &&
     0 < title.value.length &&
     title.value.length <= 100 &&
     shortDescription.value.length <= 60 &&
@@ -150,9 +178,10 @@ async function handleUpload() {
     return;
   }
 
+  // NOTE: Anything here with "!" must have been checked in isFormValid first.
   const projectUpload: IProjectUpload = {
     project: {
-      projectTypeId: projectTypeId.value,
+      projectTypeId: projectTypeId.value!,
       relatedProjectId: relatedProjectId.value,
     },
     projectDetails: {
@@ -161,8 +190,8 @@ async function handleUpload() {
       description: description.value,
     },
     authors: selectedAuthors.value,
-    genres: selectedGenreIds.value.map((id) => ({ genreId: id })),
-    tags: selectedTagIds.value.map((id) => ({ tagId: id })),
+    genres: selectedGenreIds.value.map((id, index) => ({ genreId: id, orderIndex: index })),
+    tags: selectedTagIds.value.map((id, index) => ({ tagId: id, orderIndex: index })),
   };
 
   await upload(projectUpload);
@@ -176,12 +205,25 @@ async function handleUpload() {
   // (or maybe the server could send a Redirect response? I don't think REST APIs do that tho)
   // router.push(`/project/${uploadResult.id}`);
 }
+
+onMounted(() => {
+  loadFormData();
+  projectTypeId.value = data.value?.projectTypes[0]?.id;
+});
 </script>
 
 <template>
   <div class="page-content">
     <h1 class="page-title">Upload Project</h1>
-    <div class="body">
+    <div v-if="isLoading || (!formDataError && !data)" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    <div v-else-if="formDataError" class="alert alert-danger">
+      {{ formDataError }}
+    </div>
+    <div v-else class="body">
       <form @submit.prevent="handleUpload">
         <FormElement id="projectTitle" label="Title" maxlength="70" required>
           <template #default="{ form }">
@@ -198,7 +240,7 @@ async function handleUpload() {
         <FormElement id="projectType" label="Project Type" required>
           <select id="projectType" v-model="projectTypeId" class="form-select" required>
             <option
-              v-for="projectType in projectTypeData"
+              v-for="projectType in data!.projectTypes"
               :key="projectType.id"
               :value="projectType.id"
             >
@@ -249,7 +291,7 @@ async function handleUpload() {
                 <td>
                   <MultiselectSearchDropdown
                     v-model="author.roleIds"
-                    :items="authorRolesData"
+                    :items="data!.authorRoles"
                     name-property="authorRoleName"
                     placeholder="Search roles..."
                   >
@@ -269,7 +311,7 @@ async function handleUpload() {
               <tr>
                 <td colspan="3">
                   <ComboboxWithCreate
-                    :items="authorsData"
+                    :items="data!.authors"
                     :existing-names="selectedAuthors.map((a) => a.name!)"
                     name-property="name"
                     placeholder="Search authors or type to add new..."
@@ -307,7 +349,7 @@ async function handleUpload() {
         <FormElement id="genres" label="Genres">
           <MultiselectSearchDropdown
             v-model="selectedGenreIds"
-            :items="genresData"
+            :items="data!.genres"
             name-property="genreName"
             description-property="genreDescription"
           >
@@ -316,7 +358,7 @@ async function handleUpload() {
         <FormElement id="tags" label="Tags">
           <MultiselectSearchDropdown
             v-model="selectedTagIds"
-            :items="tagsData"
+            :items="data!.tags"
             name-property="tagName"
             description-property="tagDescription"
           >

@@ -28,6 +28,7 @@ export abstract class BaseApiRepository<
         ...options.request?.headers,
         Authorization: `Bearer ${this.getJwtToken()}`,
       },
+      signal: AbortSignal.timeout(5000),
     };
     const response = await fetch(options.url, requestOptions);
 
