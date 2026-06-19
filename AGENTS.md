@@ -1,6 +1,6 @@
 # blurgames-front
 
-A Vue front-end for the BlurEngine game database based on an ASP.NET REST API.
+A Vue front-end for the blurgames game database based on an ASP.NET REST API.
 
 ## Tech Stack
 
