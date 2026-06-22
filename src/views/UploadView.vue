@@ -142,7 +142,7 @@ function handleAuthorSelect(selection: { id?: string; name: string; isNew: boole
   }
 
   const newAuthor: IProjectAuthor = {
-    id: selection.id,
+    authorId: selection.id,
     name: selection.name,
     isNewAuthor: selection.isNew,
     roleIds: [],

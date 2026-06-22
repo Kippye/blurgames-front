@@ -3,7 +3,7 @@ import type IProjectDetailsCreate from '../projectDetails/IProjectDetailsCreate'
 
 export interface IProjectAuthor {
   // Existing author
-  id?: string;
+  authorId?: string;
   // OR name of new author
   name?: string;
   isNewAuthor: boolean;
