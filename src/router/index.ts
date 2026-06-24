@@ -10,12 +10,18 @@ import ProjectTypeView from '@/views/admin/ProjectTypeView.vue';
 import AuthorRoleView from '@/views/admin/AuthorRoleView.vue';
 import TagView from '@/views/admin/TagView.vue';
 import UploadView from '@/views/UploadView.vue';
+import ProjectsView from '@/views/ProjectsView.vue';
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
     component: MainView,
+  },
+  {
+    path: '/projects',
+    name: 'Projects',
+    component: ProjectsView,
   },
   {
     path: '/upload',

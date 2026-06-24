@@ -9,6 +9,6 @@ export class ProjectTypeRepository extends BaseApiRepository<
   IProjectType
 > {
   constructor(authStore: IAuthStore) {
-    super(import.meta.env.VITE_API_PROJECTTYPE_ENDPOINT, authStore);
+    super(import.meta.env.VITE_API_PROJECT_TYPE_ENDPOINT, authStore);
   }
 }

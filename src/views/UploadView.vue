@@ -14,7 +14,7 @@ import { ProjectRepository } from '@/repositories/ProjectRepository';
 import type IProjectUpload from '@/domain/aggregate/IProjectUpload';
 import type IAuthor from '@/domain/author/IAuthor';
 import type IAuthorRole from '@/domain/authorRole/IAuthorRole';
-import type { IProjectAuthor } from '@/domain/aggregate/IProjectUpload';
+import type { IProjectAuthorUpload } from '@/domain/aggregate/IProjectUpload';
 import ComboboxWithCreate from '@/components/ComboboxWithCreate.vue';
 import { ProjectTypeRepository } from '@/repositories/ProjectTypeRepository';
 import { AuthorRoleRepository } from '@/repositories/AuthorRoleRepository';
@@ -106,7 +106,7 @@ const {
   if (uploadResult.errors) {
     // TEMP to test without back-end
     return new Promise<IResultObject<IProject>>((res) => {
-      setTimeout(() => res({ data: { ...upload.project, id: '3', appUserId: '2' } }), 2000);
+      setTimeout(() => res({ data: { ...upload.project, id: '3', uploaderId: '2' } }), 2000);
     });
   }
   return uploadResult;
@@ -132,7 +132,7 @@ const projectsWithDetails = computed(() => {
   });
 });
 // Authors
-const selectedAuthors = ref<IProjectAuthor[]>([]);
+const selectedAuthors = ref<IProjectAuthorUpload[]>([]);
 
 function handleAuthorSelect(selection: { id?: string; name: string; isNew: boolean }) {
   // Check if author already exists in the list
@@ -141,7 +141,7 @@ function handleAuthorSelect(selection: { id?: string; name: string; isNew: boole
     return;
   }
 
-  const newAuthor: IProjectAuthor = {
+  const newAuthor: IProjectAuthorUpload = {
     authorId: selection.id,
     name: selection.name,
     isNewAuthor: selection.isNew,

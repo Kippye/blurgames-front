@@ -9,6 +9,6 @@ export class AuthorRoleRepository extends BaseApiRepository<
   IAuthorRole
 > {
   constructor(authStore: IAuthStore) {
-    super(import.meta.env.VITE_API_AUTHORROLE_ENDPOINT, authStore);
+    super(import.meta.env.VITE_API_AUTHOR_ROLE_ENDPOINT, authStore);
   }
 }

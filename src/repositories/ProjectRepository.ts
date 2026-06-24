@@ -5,8 +5,9 @@ import type IProjectUpload from '@/domain/aggregate/IProjectUpload';
 import type IProjectCreate from '@/domain/project/IProjectCreate';
 import type { IResultObject } from '@/types/IResultObject';
 import { composeUrl } from '@/util/url-helpers';
+import type IProjectUpdate from '@/domain/project/IProjectUpdate';
 
-export class ProjectRepository extends BaseApiRepository<IProject, IProjectCreate, IProject> {
+export class ProjectRepository extends BaseApiRepository<IProject, IProjectCreate, IProjectUpdate> {
   constructor(authStore: IAuthStore) {
     super(import.meta.env.VITE_API_PROJECT_ENDPOINT, authStore);
   }

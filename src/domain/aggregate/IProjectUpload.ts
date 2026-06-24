@@ -1,7 +1,7 @@
 import type IProjectCreate from '../project/IProjectCreate';
 import type IProjectDetailsCreate from '../projectDetails/IProjectDetailsCreate';
 
-export interface IProjectAuthor {
+export interface IProjectAuthorUpload {
   // Existing author
   authorId?: string;
   // OR name of new author
@@ -11,14 +11,12 @@ export interface IProjectAuthor {
   roleIds: string[];
 }
 
-// TODO: These will likely be separate entities soon (with full info)
-// So these might have to be named Upload entities as well
-export interface IProjectDetailsGenre {
+export interface IProjectDetailsGenreUpload {
   genreId: string;
   orderIndex: number;
 }
 
-export interface IProjectDetailsTag {
+export interface IProjectDetailsTagUpload {
   tagId: string;
   orderIndex: number;
 }
@@ -26,7 +24,7 @@ export interface IProjectDetailsTag {
 export default interface IProjectUpload {
   project: IProjectCreate;
   projectDetails: Omit<IProjectDetailsCreate, 'projectId'>;
-  authors: IProjectAuthor[];
-  genres: IProjectDetailsGenre[];
-  tags: IProjectDetailsTag[];
+  authors: IProjectAuthorUpload[];
+  genres: IProjectDetailsGenreUpload[];
+  tags: IProjectDetailsTagUpload[];
 }

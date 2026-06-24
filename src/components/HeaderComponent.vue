@@ -32,7 +32,7 @@ function logOut() {
       <div class="collapse navbar-collapse" id="headerNavbarCollapse">
         <ul class="navbar-nav me mb-md-0">
           <NavItem to="/">Home</NavItem>
-          <NavItem to="/games">Games</NavItem>
+          <NavItem to="/projects">Projects</NavItem>
           <NavItem to="/upload">Upload</NavItem>
         </ul>
         <ul class="navbar-nav ms-md-auto mb-2 mb-md-0">

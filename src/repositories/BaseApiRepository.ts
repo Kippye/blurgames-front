@@ -5,7 +5,7 @@ import type { IResultObject } from '@/types/IResultObject';
 import type { IApiFetchOptions } from '@/types/IApiFetchOptions';
 import type { IAuthStore } from '@/domain/auth/IAuthStore';
 import type { IApiErrorResponse } from '@/types/IApiErrorResponse';
-import type { IBaseEntity } from '@/domain/IBaseEntity';
+import type { IBaseEntity, IFilter } from '@/domain/IBaseEntity';
 
 export abstract class BaseApiRepository<
   TEntity extends IBaseEntity,
@@ -99,8 +99,9 @@ export abstract class BaseApiRepository<
     return await this.handleFetch({ url });
   }
 
-  async getAll(): Promise<IResultObject<TEntity[]>> {
-    const url = composeUrl({ endpoint: this.endpoint + '/all' });
+  async getAll(filter?: IFilter<TEntity>): Promise<IResultObject<TEntity[]>> {
+    const query = filter ? new URLSearchParams(Object.entries(filter)) : undefined;
+    const url = composeUrl({ endpoint: this.endpoint + '/all', query });
     return await this.handleFetch({ url });
   }
 
