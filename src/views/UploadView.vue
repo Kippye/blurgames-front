@@ -101,16 +101,7 @@ const {
   error: uploadError,
   execute: upload,
   clear: clearUploadResult,
-} = useApi(async (upload: IProjectUpload) => {
-  const uploadResult = await projectRepo.upload(upload);
-  if (uploadResult.errors) {
-    // TEMP to test without back-end
-    return new Promise<IResultObject<IProject>>((res) => {
-      setTimeout(() => res({ data: { ...upload.project, id: '3', uploaderId: '2' } }), 2000);
-    });
-  }
-  return uploadResult;
-});
+} = useApi(async (upload: IProjectUpload) => await projectRepo.upload(upload));
 
 // Project
 const projectTypeId = ref<string>();
@@ -120,13 +111,16 @@ const selectedProjectType = computed(() => {
   return data.value?.projectTypes.find((value: IProjectType) => value.id === projectTypeId.value);
 });
 
-interface IProjectWithDetails extends IProject, IProjectDetails {}
+interface IProjectWithDetails {
+  project: IProject;
+  details: IProjectDetails;
+}
 
 const projectsWithDetails = computed(() => {
   return data.value?.projectDetails.map((projectDetails) => {
     const projectWithDetails: IProjectWithDetails = {
-      ...data.value!.projects.find((project) => project.id == projectDetails.projectId)!,
-      ...projectDetails,
+      project: data.value!.projects.find((project) => project.id == projectDetails.projectId)!,
+      details: projectDetails,
     };
     return projectWithDetails;
   });
@@ -262,10 +256,10 @@ onMounted(() => {
             <option value=""></option>
             <option
               v-for="projectInfo in projectsWithDetails"
-              :key="projectInfo.id"
-              :value="projectInfo.id"
+              :key="projectInfo.project.id"
+              :value="projectInfo.project.id"
             >
-              {{ projectInfo.title }}
+              {{ projectInfo.details.title }}
             </option>
           </select>
         </FormElement>

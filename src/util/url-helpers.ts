@@ -23,3 +23,24 @@ export function composeUrl({
 
   return url;
 }
+
+/**
+ * Create a URLSearchParams object from the keys and values of multiple objects.
+ * Feel free to pass in null / undefined.
+ * Duplicate keys are not handled.
+ */
+export function createQuery(...args: object[]): URLSearchParams {
+  const queryParams: Record<string, string> = {};
+
+  args.forEach((obj) => {
+    if (!obj) {
+      return;
+    }
+
+    Object.entries(obj).forEach(([key, value]) => {
+      queryParams[key] = String(value);
+    });
+  });
+
+  return new URLSearchParams(queryParams);
+}

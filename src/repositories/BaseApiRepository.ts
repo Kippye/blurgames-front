@@ -1,11 +1,11 @@
-import { composeUrl } from '@/util/url-helpers';
+import { composeUrl, createQuery } from '@/util/url-helpers';
 import { HttpError } from '@/types/HttpError';
 import { useRouter } from 'vue-router';
 import type { IResultObject } from '@/types/IResultObject';
 import type { IApiFetchOptions } from '@/types/IApiFetchOptions';
 import type { IAuthStore } from '@/domain/auth/IAuthStore';
 import type { IApiErrorResponse } from '@/types/IApiErrorResponse';
-import type { IBaseEntity, IFilter } from '@/domain/IBaseEntity';
+import type { IBaseEntity, IFilter, ISort } from '@/domain/IBaseEntity';
 
 export abstract class BaseApiRepository<
   TEntity extends IBaseEntity,
@@ -99,8 +99,11 @@ export abstract class BaseApiRepository<
     return await this.handleFetch({ url });
   }
 
-  async getAll(filter?: IFilter<TEntity>): Promise<IResultObject<TEntity[]>> {
-    const query = filter ? new URLSearchParams(Object.entries(filter)) : undefined;
+  async getAll(
+    filter?: IFilter<TEntity>,
+    sort?: ISort<TEntity>,
+  ): Promise<IResultObject<TEntity[]>> {
+    const query = createQuery(filter!, sort!);
     const url = composeUrl({ endpoint: this.endpoint + '/all', query });
     return await this.handleFetch({ url });
   }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth-store';
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useApi } from '@/composables/useApi';
 import { ProjectRepository } from '@/repositories/ProjectRepository';
 import { ProjectDetailsRepository } from '@/repositories/ProjectDetailsRepository';
@@ -23,6 +23,9 @@ import { formatDate, parseDate } from '@/util/calendar-helpers';
  * Details (all? that could be huge later but ok all fow now)
  */
 
+const sortBy = ref<'title' | 'uploadedAt'>('uploadedAt');
+const sortDirection = ref<'asc' | 'desc'>('desc');
+
 const authStore = useAuthStore();
 const projectRepo = new ProjectRepository(authStore);
 const projectDetailsRepo = new ProjectDetailsRepository(authStore);
@@ -40,8 +43,16 @@ const {
   execute: loadViewData,
 } = useApi(async (): Promise<IResultObject<IListViewData>> => {
   const [projectResult, projectDetailsResult] = await Promise.all([
-    projectRepo.getAll(),
-    projectDetailsRepo.getAll(),
+    projectRepo.getAll(
+      undefined,
+      sortBy.value == 'uploadedAt'
+        ? { sortBy: sortBy.value, sortDir: sortDirection.value }
+        : undefined,
+    ),
+    projectDetailsRepo.getAll(
+      undefined,
+      sortBy.value == 'title' ? { sortBy: sortBy.value, sortDir: sortDirection.value } : undefined,
+    ),
   ]);
 
   const allErrors = new Set<string>([
@@ -67,13 +78,26 @@ interface IProjectWithInfo {
 }
 
 // TODO: This doesn't handle multiple project details versions
+// TODO: Figure out how to handle sorting here? Because if sorted by projects, i should map that; if sorted by details, i should map that
+// Right?
 const projectsWithInfo = computed(() => {
-  return data.value?.projectDetails.map((projectDetails) => {
-    return {
-      project: data.value!.projects.find((project) => project.id == projectDetails.projectId)!,
-      details: projectDetails,
-    } as IProjectWithInfo;
-  });
+  if (sortBy.value === 'title') {
+    return data.value?.projectDetails.map((projectDetails) => {
+      return {
+        project: data.value!.projects.find((project) => project.id == projectDetails.projectId)!,
+        details: projectDetails,
+      } as IProjectWithInfo;
+    });
+  } else {
+    return data.value?.projects.map((project) => {
+      return {
+        project,
+        details: data.value!.projectDetails.find(
+          (projectDetails) => projectDetails.projectId == project.id,
+        )!,
+      } as IProjectWithInfo;
+    });
+  }
 });
 
 onMounted(() => {
