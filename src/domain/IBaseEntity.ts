@@ -4,9 +4,16 @@ export interface IBaseEntity {
 
 type Mapish = { [k: string]: unknown };
 
-export type IFilter<T = Mapish> = Partial<Omit<T, keyof IBaseEntity>>;
+interface IFilterProperty<T> {
+  value: T | null;
+  invert?: boolean;
+}
 
-export type ISort<T = Mapish> = {
-  sortBy: keyof T;
-  sortDir: 'asc' | 'desc';
+export type Filter<T> = {
+  [K in keyof T]?: IFilterProperty<T[K]>;
+};
+
+export type Sort<T = Mapish> = {
+  key: keyof T;
+  order: 'asc' | 'desc';
 };

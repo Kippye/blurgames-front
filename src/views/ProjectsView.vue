@@ -10,17 +10,17 @@ import type { IResultObject } from '@/types/IResultObject';
 import { formatDate, parseDate } from '@/util/calendar-helpers';
 
 /* Columns
- * Title (ProjectDetails)
- * {Creator}
- * ShortDescription (Details)
- * Uploader (Project)
- * ReleaseDate (Last ProjectRelease date - WIP)
- * UploadedAt (Project)
+ * ✅️ Title (ProjectDetails)
+ * {Creator} - could be like "Boris Johnson + 6" and show the full list on click / hover
+ * ✅️ ShortDescription (Details)
+ * ✅️ Uploader (Project)
+ * ReleaseDate / "Updated" (Last ProjectRelease date - WIP)
+ * ✅️ UploadedAt (Project)
  */
 
 /* What do we need to fetch?
  * Projects (duh)
- * Details (all? that could be huge later but ok all fow now)
+ * Details (all? that could be huge later but ok all fow now) TODO: Fetch only active / latest ProjectDetails per project
  */
 
 const sortBy = ref<'title' | 'uploadedAt'>('uploadedAt');
@@ -45,13 +45,11 @@ const {
   const [projectResult, projectDetailsResult] = await Promise.all([
     projectRepo.getAll(
       undefined,
-      sortBy.value == 'uploadedAt'
-        ? { sortBy: sortBy.value, sortDir: sortDirection.value }
-        : undefined,
+      sortBy.value == 'uploadedAt' ? { key: sortBy.value, order: sortDirection.value } : undefined,
     ),
     projectDetailsRepo.getAll(
       undefined,
-      sortBy.value == 'title' ? { sortBy: sortBy.value, sortDir: sortDirection.value } : undefined,
+      sortBy.value == 'title' ? { key: sortBy.value, order: sortDirection.value } : undefined,
     ),
   ]);
 
@@ -79,7 +77,6 @@ interface IProjectWithInfo {
 
 // TODO: This doesn't handle multiple project details versions
 // TODO: Figure out how to handle sorting here? Because if sorted by projects, i should map that; if sorted by details, i should map that
-// Right?
 const projectsWithInfo = computed(() => {
   if (sortBy.value === 'title') {
     return data.value?.projectDetails.map((projectDetails) => {

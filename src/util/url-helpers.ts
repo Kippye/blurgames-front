@@ -33,12 +33,14 @@ export function createQuery(...args: object[]): URLSearchParams {
   const queryParams: Record<string, string> = {};
 
   args.forEach((obj) => {
-    if (!obj) {
+    if (obj == null) {
       return;
     }
 
     Object.entries(obj).forEach(([key, value]) => {
-      queryParams[key] = String(value);
+      if (value !== undefined) {
+        queryParams[key] = String(value);
+      }
     });
   });
 
