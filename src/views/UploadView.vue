@@ -22,6 +22,9 @@ import { GenreRepository } from '@/repositories/GenreRepository';
 import { TagRepository } from '@/repositories/TagRepository';
 import { AuthorRepository } from '@/repositories/AuthorRepository';
 import { ProjectDetailsRepository } from '@/repositories/ProjectDetailsRepository';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const authStore = useAuthStore();
 const projectRepo = new ProjectRepository(authStore);
@@ -195,9 +198,13 @@ async function handleUpload() {
     return;
   }
 
-  // TODO: Redirect to the project's page
-  // (or maybe the server could send a Redirect response? I don't think REST APIs do that tho)
-  // router.push(`/project/${uploadResult.id}`);
+  // Redirect to the project's page
+  router.push({
+    name: 'Project',
+    params: { id: uploadResult.value!.id },
+    state: { title: title.value },
+  });
+  clearUploadResult();
 }
 
 onMounted(() => {

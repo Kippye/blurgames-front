@@ -129,7 +129,16 @@ onMounted(() => {
       </thead>
       <tbody>
         <tr v-for="projectInfo in projectsWithInfo" :key="projectInfo.project.id">
-          <td>{{ projectInfo.details.title }}</td>
+          <td>
+            <RouterLink
+              :to="{
+                name: 'Project',
+                params: { id: projectInfo.project.id },
+                state: { title: projectInfo.details.title },
+              }"
+              >{{ projectInfo.details.title }}</RouterLink
+            >
+          </td>
           <td>{{ projectInfo.details.shortDescription }}</td>
           <td>{{ projectInfo.project.uploaderName }}</td>
           <td>{{ formatDate(parseDate(projectInfo.project.uploadedAt)) }}</td>
