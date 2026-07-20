@@ -10,6 +10,14 @@ import type { IResultObject } from '@/types/IResultObject';
 import type IProjectType from '@/domain/projectType/IProjectType';
 import { ProjectTypeRepository } from '@/repositories/ProjectTypeRepository';
 import { formatDate } from '@/util/calendar-helpers';
+import type IProjectDetailsGenre from '@/domain/projectDetailsGenre/IProjectDetailsGenre';
+import type IProjectDetailsTag from '@/domain/projectDetailsTag/IProjectDetailsTag';
+import { ProjectDetailsTagRepository } from '@/repositories/ProjectDetailsTagRepository';
+import { ProjectDetailsGenreRepository } from '@/repositories/ProjectDetailsGenreRepository';
+import type IGenre from '@/domain/genre/IGenre';
+import type ITag from '@/domain/tag/ITag';
+import { GenreRepository } from '@/repositories/GenreRepository';
+import { TagRepository } from '@/repositories/TagRepository';
 
 const props = defineProps<{
   id: string;
@@ -25,15 +33,19 @@ const authStore = useAuthStore();
 const projectRepo = new ProjectRepository(authStore);
 const projectDetailsRepo = new ProjectDetailsRepository(authStore);
 const projectTypeRepo = new ProjectTypeRepository(authStore);
+const projectDetailsGenreRepo = new ProjectDetailsGenreRepository(authStore);
+const genreRepo = new GenreRepository(authStore);
+const projectDetailsTagRepo = new ProjectDetailsTagRepository(authStore);
+const tagRepo = new TagRepository(authStore);
 
 // Data
 interface IProjectPageData {
   project: IProject;
   projectDetails: IProjectDetails;
   projectType: IProjectType;
+  projectGenres: IGenre[];
+  projectTags: ITag[];
   /*
-  projectGenres
-  projectTags
   projectAuthors
   */
 }
@@ -54,37 +66,55 @@ const {
     ),
   ]);
 
-  const baseErrors = new Set<string>([
+  let errors = new Set<string>([
     ...(projectResult.errors ?? []),
     ...(projectDetailsResult.errors ?? []),
   ]);
-
   if (projectDetailsResult.data!.length == 0) {
-    baseErrors.add('Public and active project details not found');
+    errors.add('Public and active project details not found');
+  }
+  if (errors.size > 0) {
+    return { errors: Array.from(errors) };
   }
 
-  // Return early if there were errors loading the base project data
-  if (baseErrors.size > 0) {
-    return { errors: Array.from(baseErrors) };
-  }
+  const project = projectResult.data!;
+  const projectDetails = projectDetailsResult.data![0]!; // Use most recent project details
 
   // Get additional data
-  const [projectTypeResult] = await Promise.all([
-    projectTypeRepo.get(projectResult.data!.projectTypeId),
-    // ...
+  const [projectTypeResult, projectDetailsGenresResult, projectDetailsTagsResult] =
+    await Promise.all([
+      projectTypeRepo.get(projectResult.data!.projectTypeId),
+      projectDetailsGenreRepo.getAll({ projectDetailsId: { value: projectDetails.id } }),
+      projectDetailsTagRepo.getAll({ projectDetailsId: { value: projectDetails.id } }),
+      // ...
+    ]);
+
+  errors = new Set<string>([
+    ...(projectTypeResult.errors ?? []),
+    ...(projectDetailsGenresResult.errors ?? []),
+    ...(projectDetailsTagsResult.errors ?? []),
   ]);
+  if (errors.size > 0) {
+    return { errors: Array.from(errors) };
+  }
 
-  const extraErrors = new Set<string>([...(projectTypeResult.errors ?? [])]);
+  // Get data at other end of projectDetails relations
+  const projectGenreIds = new Set<string>(projectDetailsGenresResult.data!.map((dg) => dg.genreId));
+  const projectTagIds = new Set<string>(projectDetailsTagsResult.data!.map((dt) => dt.tagId));
+  const [genresResult, tagsResult] = await Promise.all([genreRepo.getAll(), tagRepo.getAll()]);
 
-  if (extraErrors.size > 0) {
-    return { errors: Array.from(extraErrors) };
+  errors = new Set<string>([...(genresResult.errors ?? []), ...(tagsResult.errors ?? [])]);
+  if (errors.size > 0) {
+    return { errors: Array.from(errors) };
   }
 
   return {
     data: {
-      project: projectResult.data!,
-      projectDetails: projectDetailsResult.data![0]!, // Use most recent project details
+      project: project,
+      projectDetails: projectDetails,
       projectType: projectTypeResult.data!,
+      projectGenres: genresResult.data!.filter((g) => projectGenreIds.has(g.id)),
+      projectTags: tagsResult.data!.filter((t) => projectTagIds.has(t.id)),
     },
   };
 });
@@ -125,6 +155,26 @@ onMounted(() => {
         <tr>
           <th scope="row">Created at</th>
           <td>{{ formatDate(new Date(data?.project.uploadedAt ?? '')) }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Genres</th>
+          <td>
+            <span
+              class="badge bg-success me-2"
+              v-for="genre in data?.projectGenres"
+              :key="genre.id"
+            >
+              {{ genre.genreName }}
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Tags</th>
+          <td>
+            <span class="badge bg-primary me-2" v-for="tag in data?.projectTags" :key="tag.id">{{
+              tag.tagName
+            }}</span>
+          </td>
         </tr>
       </tbody>
     </table>
