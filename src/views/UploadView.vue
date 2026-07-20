@@ -63,12 +63,12 @@ const {
     tagsResult,
   ] = await Promise.all([
     projectRepo.getAll(),
-    projectDetailsRepo.getAll(),
-    projectTypeRepo.getAll(),
-    authorRepo.getAll(),
-    authorRoleRepo.getAll(),
-    genreRepo.getAll(),
-    tagRepo.getAll(),
+    projectDetailsRepo.getAll(undefined, { key: 'title' }),
+    projectTypeRepo.getAll(undefined, { key: 'projectTypeName' }),
+    authorRepo.getAll(undefined, { key: 'name' }),
+    authorRoleRepo.getAll(undefined, { key: 'authorRoleName' }),
+    genreRepo.getAll(undefined, { key: 'genreName' }),
+    tagRepo.getAll(undefined, { key: 'tagName' }),
   ]);
 
   const allErrors = new Set<string>([

@@ -15,5 +15,5 @@ export type Filter<T> = {
 
 export type Sort<T = Mapish> = {
   key: keyof T;
-  order: 'asc' | 'desc';
+  order?: 'asc' | 'desc';
 };

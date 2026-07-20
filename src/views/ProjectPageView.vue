@@ -10,8 +10,6 @@ import type { IResultObject } from '@/types/IResultObject';
 import type IProjectType from '@/domain/projectType/IProjectType';
 import { ProjectTypeRepository } from '@/repositories/ProjectTypeRepository';
 import { formatDate } from '@/util/calendar-helpers';
-import type IProjectDetailsGenre from '@/domain/projectDetailsGenre/IProjectDetailsGenre';
-import type IProjectDetailsTag from '@/domain/projectDetailsTag/IProjectDetailsTag';
 import { ProjectDetailsTagRepository } from '@/repositories/ProjectDetailsTagRepository';
 import { ProjectDetailsGenreRepository } from '@/repositories/ProjectDetailsGenreRepository';
 import type IGenre from '@/domain/genre/IGenre';
@@ -84,8 +82,14 @@ const {
   const [projectTypeResult, projectDetailsGenresResult, projectDetailsTagsResult] =
     await Promise.all([
       projectTypeRepo.get(projectResult.data!.projectTypeId),
-      projectDetailsGenreRepo.getAll({ projectDetailsId: { value: projectDetails.id } }),
-      projectDetailsTagRepo.getAll({ projectDetailsId: { value: projectDetails.id } }),
+      projectDetailsGenreRepo.getAll(
+        { projectDetailsId: { value: projectDetails.id } },
+        { key: 'orderIndex' },
+      ),
+      projectDetailsTagRepo.getAll(
+        { projectDetailsId: { value: projectDetails.id } },
+        { key: 'orderIndex' },
+      ),
       // ...
     ]);
 
@@ -99,8 +103,8 @@ const {
   }
 
   // Get data at other end of projectDetails relations
-  const projectGenreIds = new Set<string>(projectDetailsGenresResult.data!.map((dg) => dg.genreId));
-  const projectTagIds = new Set<string>(projectDetailsTagsResult.data!.map((dt) => dt.tagId));
+  const projectGenreIds = projectDetailsGenresResult.data!.map((dg) => dg.genreId);
+  const projectTagIds = projectDetailsTagsResult.data!.map((dt) => dt.tagId);
   const [genresResult, tagsResult] = await Promise.all([genreRepo.getAll(), tagRepo.getAll()]);
 
   errors = new Set<string>([...(genresResult.errors ?? []), ...(tagsResult.errors ?? [])]);
@@ -108,13 +112,20 @@ const {
     return { errors: Array.from(errors) };
   }
 
+  const genresById = new Map(genresResult.data!.map((g) => [g.id, g]));
+  const tagsById = new Map(tagsResult.data!.map((t) => [t.id, t]));
+
   return {
     data: {
       project: project,
       projectDetails: projectDetails,
       projectType: projectTypeResult.data!,
-      projectGenres: genresResult.data!.filter((g) => projectGenreIds.has(g.id)),
-      projectTags: tagsResult.data!.filter((t) => projectTagIds.has(t.id)),
+      projectGenres: projectGenreIds
+        .filter((pGenreId) => genresById.has(pGenreId))
+        .map((pGenreId) => genresById.get(pGenreId)!),
+      projectTags: projectTagIds
+        .filter((pTagId) => tagsById.has(pTagId))
+        .map((pTagId) => tagsById.get(pTagId)!),
     },
   };
 });

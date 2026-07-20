@@ -228,7 +228,6 @@ onBeforeUnmount(() => {
         >
           <div class="d-flex align-items-center">
             <span class="item-name">{{ item[nameProperty] as string }}</span>
-            <span v-if="item.id" class="badge bg-light text-dark ms-2">existing</span>
           </div>
           <div
             v-if="descriptionProperty && showDescriptions"
