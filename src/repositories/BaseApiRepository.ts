@@ -79,6 +79,10 @@ export abstract class BaseApiRepository<
             return { errors: [apiError.error] };
           }
         } catch {
+          if (res.status === 403) // Forbidden is usually empty-body
+          {
+            return { errors: ['Not allowed'] };
+          }
           return { errors: ['Invalid response from server.'] };
         }
       }

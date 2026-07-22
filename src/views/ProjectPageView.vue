@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth-store';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useApi } from '@/composables/useApi';
 import { ProjectRepository } from '@/repositories/ProjectRepository';
 import { ProjectDetailsRepository } from '@/repositories/ProjectDetailsRepository';
@@ -16,6 +16,8 @@ import type IGenre from '@/domain/genre/IGenre';
 import type ITag from '@/domain/tag/ITag';
 import { GenreRepository } from '@/repositories/GenreRepository';
 import { TagRepository } from '@/repositories/TagRepository';
+import { useRouter } from 'vue-router';
+import DeleteProjectModal from '@/components/project-page/DeleteProjectModal.vue';
 
 const props = defineProps<{
   id: string;
@@ -27,6 +29,8 @@ const projectTitle = (
   }
 )?.title;
 
+const router = useRouter();
+
 const authStore = useAuthStore();
 const projectRepo = new ProjectRepository(authStore);
 const projectDetailsRepo = new ProjectDetailsRepository(authStore);
@@ -35,6 +39,10 @@ const projectDetailsGenreRepo = new ProjectDetailsGenreRepository(authStore);
 const genreRepo = new GenreRepository(authStore);
 const projectDetailsTagRepo = new ProjectDetailsTagRepository(authStore);
 const tagRepo = new TagRepository(authStore);
+
+const { getAuthInfo, getUserType } = authStore;
+
+const showDeleteProjectModal = ref(false);
 
 // Data
 interface IProjectPageData {
@@ -134,10 +142,29 @@ onMounted(() => {
   window.scrollTo(0, 0);
   loadViewData();
 });
+
+function openDeleteProjectModal() {
+  if (data.value?.project != null) {
+    showDeleteProjectModal.value = true;
+  }
+}
+
+function handleProjectDeleted() {
+  router.push({ name: 'Projects' });
+}
 </script>
 
 <template>
-  <h1>{{ isLoading ? projectTitle : data?.projectDetails.title }}</h1>
+  <div class="d-flex align-items-center">
+    <h1 class="col">{{ isLoading ? projectTitle : data?.projectDetails.title }}</h1>
+    <button
+      v-if="getAuthInfo()?.userId == data?.project.uploaderId || getUserType() === 'admin'"
+      class="sameline col-sm-auto btn btn-danger"
+      @click="openDeleteProjectModal"
+    >
+      Delete
+    </button>
+  </div>
 
   <div v-if="isLoading" class="text-center py-5">
     <div class="spinner-border text-primary" role="status">
@@ -192,5 +219,11 @@ onMounted(() => {
     <p>
       {{ data?.projectDetails.description }}
     </p>
+    <DeleteProjectModal
+      v-model="showDeleteProjectModal"
+      :project="data?.project"
+      :project-name="data?.projectDetails.title"
+      @project-deleted="handleProjectDeleted"
+    />
   </div>
 </template>

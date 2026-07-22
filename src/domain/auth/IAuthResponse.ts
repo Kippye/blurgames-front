@@ -4,5 +4,5 @@ export interface IAuthResponse {
   userName: string;
   email: string;
   roles: string[];
-  appUserId: string;
+  userId: string;
 }

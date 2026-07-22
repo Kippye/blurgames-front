@@ -4,4 +4,5 @@ export interface IAuthInfo {
   userName: string;
   email: string;
   systemRoles: string[];
+  userId: string;
 }
