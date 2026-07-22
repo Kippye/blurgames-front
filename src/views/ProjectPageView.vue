@@ -155,6 +155,17 @@ function handleProjectDeleted() {
 </script>
 
 <template>
+  <div
+    v-if="
+      !isLoading &&
+      data?.projectType.projectTypeName == 'Modification' &&
+      data?.project.relatedProjectId == null
+    "
+    class="alert alert-warning"
+    role="alert"
+  >
+    <strong>This modification is an orphan.</strong> The related project may have been deleted.
+  </div>
   <div class="d-flex align-items-center">
     <h1 class="col">{{ isLoading ? projectTitle : data?.projectDetails.title }}</h1>
     <button
