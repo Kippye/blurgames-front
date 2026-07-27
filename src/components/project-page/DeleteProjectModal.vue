@@ -23,7 +23,7 @@ const projectRepo = new ProjectRepository(authStore);
   <DeleteModal
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
-    entity-type-name="Genre"
+    entity-type-name="Project"
     :entity-name="projectName"
     :entity-id="project?.id"
     :repository="projectRepo"
