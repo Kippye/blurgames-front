@@ -67,7 +67,7 @@ const formErrors = computed(() => {
   if (projectDetails.shortDescription.length > 60) {
     errs.push('Short description must be 60 characters or shorter');
   }
-  if (projectDetails.description.length > 60) {
+  if (projectDetails.description.length > 1000) {
     errs.push('Description must be 1000 characters or shorter');
   }
   return errs;
