@@ -1,3 +1,7 @@
+/* Import bootstrap icon font */
+@import url('bootstrap-icons/font/bootstrap-icons.css');
+
+
 /* Show that the navbar is fixed to the top */
 body {
   min-height: 75rem;

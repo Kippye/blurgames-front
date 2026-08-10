@@ -1,6 +1,7 @@
+// NOTE:
+// - This does not have projectId because it's set from parent entities
+// - This does not have projectDetailsId because every details edit creates a new ProjectDetails
 export default interface IProjectDetailsGenreCreate {
-  projectId: string;
-  projectDetailsId: string;
   genreId: string;
   orderIndex: number;
 }

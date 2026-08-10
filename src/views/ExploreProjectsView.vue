@@ -23,6 +23,14 @@ import { formatDate, parseDate } from '@/util/calendar-helpers';
  * Details (all? that could be huge later but ok all fow now) TODO: Fetch only active / latest ProjectDetails per project
  */
 
+/**
+ * Idea
+ * We can get ALL ProjectDetails, group them by project, sort by publishedAt, and get the most recent ones
+ *
+ * Also observation: we can do pagination ONLY based on Projects because there are so many ProjectDetails
+ * But how do we sort the Projects by fields in ProjectDetails?
+ */
+
 const sortBy = ref<'title' | 'uploadedAt'>('uploadedAt');
 const sortDirection = ref<'asc' | 'desc'>('desc');
 

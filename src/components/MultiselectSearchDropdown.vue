@@ -8,10 +8,12 @@ interface IDropdownProps {
   descriptionProperty?: keyof T;
   placeholder?: string;
   hidePills?: boolean;
+  itemClass?: string;
 }
 
 const props = withDefaults(defineProps<IDropdownProps>(), {
   placeholder: 'Search...',
+  itemClass: 'badge bg-primary',
 });
 
 const selectedItemIds = defineModel<string[]>({ default: () => [] });
@@ -121,7 +123,7 @@ onBeforeUnmount(() => {
       <span
         v-for="itemId in selectedItemIds"
         :key="itemId"
-        class="badge bg-primary me-1 mb-1 d-inline-flex align-items-center"
+        :class="itemClass + ' me-1 md-1 d-inline-flex align-items-center'"
       >
         {{ items.find((item) => item.id === itemId)![nameProperty] as string }}
         <button

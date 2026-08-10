@@ -185,10 +185,10 @@ async function handleUpload() {
       title: title.value,
       shortDescription: shortDescription.value,
       description: description.value,
+      genres: selectedGenreIds.value.map((id, index) => ({ genreId: id, orderIndex: index })),
+      tags: selectedTagIds.value.map((id, index) => ({ tagId: id, orderIndex: index })),
     },
     authors: selectedAuthors.value,
-    genres: selectedGenreIds.value.map((id, index) => ({ genreId: id, orderIndex: index })),
-    tags: selectedTagIds.value.map((id, index) => ({ tagId: id, orderIndex: index })),
   };
 
   await upload(projectUpload);

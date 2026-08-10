@@ -1,5 +1,5 @@
 import type IProjectCreate from '../project/IProjectCreate';
-import type IProjectDetailsCreate from '../projectDetails/IProjectDetailsCreate';
+import type IProjectDetailsUpload from './IProjectDetailsUpload';
 
 export interface IProjectAuthorUpload {
   // Existing author
@@ -11,20 +11,8 @@ export interface IProjectAuthorUpload {
   roleIds: string[];
 }
 
-export interface IProjectDetailsGenreUpload {
-  genreId: string;
-  orderIndex: number;
-}
-
-export interface IProjectDetailsTagUpload {
-  tagId: string;
-  orderIndex: number;
-}
-
 export default interface IProjectUpload {
   project: IProjectCreate;
-  projectDetails: Omit<IProjectDetailsCreate, 'projectId'>;
+  projectDetails: IProjectDetailsUpload;
   authors: IProjectAuthorUpload[];
-  genres: IProjectDetailsGenreUpload[];
-  tags: IProjectDetailsTagUpload[];
 }
