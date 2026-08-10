@@ -1,6 +1,10 @@
-# API documentation for clanker
-openapi.json
-plans/
+# Compiled output
+/dist
+/tmp
+/out-tsc
+
+# Node
+/node_modules
 
 # Logs
 logs
@@ -11,32 +15,26 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-.DS_Store
-dist
-dist-ssr
-coverage
-*.local
-
-# Editor directories and files
+# IDEs and editors
 .vscode/*
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+.history/*
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
 
-*.tsbuildinfo
-
-.eslintcache
-
-# Cypress
-/cypress/videos/
-/cypress/screenshots/
-
-# Vitest
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
 __screenshots__/
 
-# Vite
-*.timestamp-*-*.mjs
+# System files
+.DS_Store
+Thumbs.db

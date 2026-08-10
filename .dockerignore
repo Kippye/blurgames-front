@@ -1,6 +1,58 @@
-.git
 README.md
-.gitlab-ci.yml
-docker-compose.yml
-.dockerignore
+
+# Source: https://docs.docker.com/guides/angular/#step-3-create-the-dockerignore-file (modified)
+# ================================
+# Node and build output
+# ================================
 node_modules
+dist
+out-tsc
+.angular
+.cache
+.tmp
+
+# ================================
+# Testing & Coverage
+# ================================
+coverage
+reports
+playwright-report
+.vite
+.vitepress
+
+# ================================
+# Environment & log files
+# ================================
+*.env*
+!*.env.production
+*.log
+*.tsbuildinfo
+
+# ================================
+# IDE & OS-specific files
+# ================================
+.vscode
+.idea
+
+# ================================
+# Version control & CI files
+# ================================
+.git
+.gitignore
+.github
+
+# ================================
+# Docker & local orchestration
+# ================================
+Dockerfile
+Dockerfile.*
+.dockerignore
+docker-compose.yml
+docker-compose*.yml
+
+# ================================
+# Miscellaneous
+# ================================
+*.bak
+*.old
+*.tmp
