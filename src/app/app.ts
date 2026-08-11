@@ -1,13 +1,17 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { NavComponent } from './layout/nav.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, NavComponent],
   template: `
-    <h1>Hello, {{ title() }}</h1>
-
-    <router-outlet />
+    <div class="d-flex flex-column min-vh-100">
+      <app-nav />
+      <main class="container flex-grow-1 bg-light p-4 mb-3 rounded">
+        <router-outlet />
+      </main>
+    </div>
   `,
   styles: [],
 })
