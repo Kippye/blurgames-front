@@ -25,7 +25,7 @@ import {
     <nav
       class="navbar navbar-expand-md navbar-light bg-body-tertiary bg-gradient px-4 mb-3 sticky-top"
     >
-      <a class="navbar-brand">Blurgames</a>
+      <a class="navbar-brand" routerLink="/">Blurgames</a>
       <button
         class="navbar-toggler"
         type="button"
@@ -78,14 +78,14 @@ import {
                 Admin
               </button>
               <div ngbDropdownMenu aria-labelledby="dropdownAdmin">
-                <a ngbDropdownItem routerLink="/author-roles" class="dropdown-item">
+                <a ngbDropdownItem routerLink="/admin/author-roles" class="dropdown-item">
                   Author Roles
                 </a>
-                <a ngbDropdownItem routerLink="/genres" class="dropdown-item"> Genres </a>
-                <a ngbDropdownItem routerLink="/project-types" class="dropdown-item">
+                <a ngbDropdownItem routerLink="/admin/genres" class="dropdown-item"> Genres </a>
+                <a ngbDropdownItem routerLink="/admin/project-types" class="dropdown-item">
                   Project Types
                 </a>
-                <a ngbDropdownItem routerLink="/tags" class="dropdown-item"> Tags </a>
+                <a ngbDropdownItem routerLink="/admin/tags" class="dropdown-item"> Tags </a>
               </div>
             </div>
           }

@@ -30,8 +30,6 @@ export class ValidationErrorsComponent {
   get messages(): string[] {
     const errors = this.control().errors;
 
-    console.log(errors);
-
     if (!errors) {
       return [];
     }
@@ -39,7 +37,6 @@ export class ValidationErrorsComponent {
     const messages: string[] = [];
 
     for (const [key, value] of Object.entries(errors)) {
-      console.log(key, value);
       // Explicit error message is preferred
       if (typeof value === 'string') {
         messages.push(value);

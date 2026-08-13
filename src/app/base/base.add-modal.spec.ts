@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Home } from './home';
+import { BaseAddModal } from './base.add-modal';
 
-describe('Home', () => {
-  let component: Home;
-  let fixture: ComponentFixture<Home>;
+describe('BaseAddModal', () => {
+  let component: BaseAddModal;
+  let fixture: ComponentFixture<BaseAddModal>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Home],
+      imports: [BaseAddModal],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Home);
+    fixture = TestBed.createComponent(BaseAddModal);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

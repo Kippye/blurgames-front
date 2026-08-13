@@ -137,7 +137,6 @@ export class RegisterComponent {
     this.form.markAllAsTouched();
     this.submitted.update((v) => !v);
     if (this.form.invalid) {
-      console.log('Invalid');
       return;
     }
 
