@@ -34,6 +34,6 @@ export abstract class ApiCrudService<
   }
 
   delete(id: string) {
-    return this.api.delete<T>(composeUrl({ endpoint: this.endpoint, id: id }));
+    return this.api.delete(composeUrl({ endpoint: this.endpoint, id: id }));
   }
 }

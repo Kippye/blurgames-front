@@ -4,22 +4,26 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { BaseFormControlComponent } from '../../base/base.form-control.component';
 import { GenreService } from './genre.service';
 import { IGenre, IGenreCreate } from './genre.types';
-import { EmptyResult, IResult, LoadingResult } from '../../base/base.types';
+import { IResult, ResultFactory } from '../../base/base.types';
 import { ValidationErrorsComponent } from '../validation/validation.errors';
+import { BaseAddModalHeader } from '../../base/components/modal-header.component';
+import { BaseAddModalFooter } from '../../base/components/add-modal-footer.component';
 
 @Component({
   selector: 'app-genre-add-modal',
-  imports: [ReactiveFormsModule, BaseFormControlComponent, ValidationErrorsComponent],
+  imports: [
+    ReactiveFormsModule,
+    BaseFormControlComponent,
+    ValidationErrorsComponent,
+    BaseAddModalHeader,
+    BaseAddModalFooter,
+  ],
   template: `
-    <div class="modal-header">
-      <h5 class="modal-title" id="addGenreModalLabel">Add New Genre</h5>
-      <button
-        type="button"
-        class="btn-close"
-        aria-label="Close"
-        (click)="activeModal.dismiss('Closed')"
-      ></button>
-    </div>
+    <app-add-modal-header
+      action="Add new"
+      entityName="Genre"
+      (modalClose)="activeModal.dismiss('Closed')"
+    />
     <div class="modal-body">
       <form [formGroup]="addForm" (ngSubmit)="handleCreate()">
         <app-form-control id="genreName" label="Name" required>
@@ -44,24 +48,11 @@ import { ValidationErrorsComponent } from '../validation/validation.errors';
         </div>
       }
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="activeModal.close(false)">
-        Cancel
-      </button>
-      <button
-        type="button"
-        class="btn btn-primary"
-        (click)="handleCreate()"
-        [disabled]="createState().loading"
-      >
-        @if (createState().loading) {
-          <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-          Creating...
-        } @else {
-          Create
-        }
-      </button>
-    </div>
+    <app-add-modal-footer
+      [isLoading]="createState().loading"
+      (create)="handleCreate()"
+      (modalCancel)="activeModal.close(false)"
+    />
   `,
   styles: ``,
 })
@@ -71,8 +62,7 @@ export class GenreAddModalComponent {
   genreService = inject(GenreService);
 
   submitted = signal(false);
-
-  createState = signal<IResult<IGenre>>(new EmptyResult<IGenre>());
+  createState = signal<IResult<IGenre>>(ResultFactory.empty());
 
   addForm = this.fb.nonNullable.group({
     genreName: ['', Validators.required],
@@ -86,7 +76,7 @@ export class GenreAddModalComponent {
       return;
     }
 
-    this.createState.set(new LoadingResult<IGenre>());
+    this.createState.set(ResultFactory.loading());
 
     const genreCreate: IGenreCreate = {
       genreName: this.addForm.controls.genreName.value,
@@ -95,20 +85,11 @@ export class GenreAddModalComponent {
 
     this.genreService.create(genreCreate).subscribe({
       next: (created) => {
-        this.createState.set({
-          loading: false,
-          data: created,
-          error: null,
-        });
+        this.createState.set(ResultFactory.success(created));
         this.activeModal.close(created);
       },
       error: (error: Error) => {
-        console.log(error.message);
-        this.createState.set({
-          loading: false,
-          data: null,
-          error: error!.message,
-        });
+        this.createState.set(ResultFactory.error(error!.message));
       },
     });
   }

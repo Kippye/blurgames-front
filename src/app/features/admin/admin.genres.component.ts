@@ -4,6 +4,7 @@ import { IGenre } from '../genres/genre.types';
 import { GenreAddModalComponent } from '../genres/genre.add-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { GenreDeleteModalComponent } from '../genres/genre.delete-modal.component';
 
 @Component({
   selector: 'app-admin-genres',
@@ -87,34 +88,32 @@ export class AdminGenresComponent {
     });
     this.modalService.open(GenreAddModalComponent, { centered: true }).result.then(
       (result) => {
-        console.log(result);
         if (result) {
           this.refreshData();
+          this.selectedGenre.set(null);
         }
       },
-      (reason) => {
-        console.warn(reason);
+      () => {
+        this.selectedGenre.set(null);
       },
     );
   }
 
-  handleEditModalClose() {
-    this.selectedGenre.set(null);
-  }
-
-  async handleGenreUpdated() {
-    this.refreshData();
-  }
-
   openDeleteModal(genre: IGenre) {
     this.genreToDelete.set(genre);
-  }
+    const modalRef = this.modalService.open(GenreDeleteModalComponent, { centered: true });
+    modalRef.componentInstance.itemToDelete = this.genreToDelete();
 
-  handleDeleteModalClose() {
-    this.genreToDelete.set(null);
-  }
-
-  async handleGenreDeleted() {
-    this.refreshData();
+    modalRef.result.then(
+      (result) => {
+        if (result) {
+          this.refreshData();
+          this.genreToDelete.set(null);
+        }
+      },
+      () => {
+        this.genreToDelete.set(null);
+      },
+    );
   }
 }

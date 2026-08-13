@@ -24,14 +24,36 @@ export interface IResult<T> {
   error: string | null;
 }
 
-export class EmptyResult<T> implements IResult<T> {
-  loading = false;
-  data = null;
-  error = null;
-}
+export class ResultFactory {
+  static empty<T>(): IResult<T> {
+    return {
+      loading: false,
+      data: null,
+      error: null,
+    };
+  }
 
-export class LoadingResult<T> implements IResult<T> {
-  loading = true;
-  data = null;
-  error = null;
+  static loading<T>(): IResult<T> {
+    return {
+      loading: true,
+      data: null,
+      error: null,
+    };
+  }
+
+  static error<T>(error: string): IResult<T> {
+    return {
+      loading: false,
+      data: null,
+      error,
+    };
+  }
+
+  static success<T>(data: T): IResult<T> {
+    return {
+      loading: false,
+      data,
+      error: null,
+    };
+  }
 }

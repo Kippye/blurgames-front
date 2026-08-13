@@ -18,7 +18,7 @@ export class ApiClient {
     return this.http.put<T>(url, body);
   }
 
-  delete<T>(url: string): Observable<T> {
-    return this.http.delete<T>(url);
+  delete(url: string): Observable<void> {
+    return this.http.delete<void>(url);
   }
 }
