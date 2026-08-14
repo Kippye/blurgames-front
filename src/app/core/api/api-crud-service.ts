@@ -1,6 +1,8 @@
 import { inject } from '@angular/core';
 import { ApiClient } from './api-client';
-import { Filter, IBaseEntity, Sort } from '../../base/base.types';
+import { IBaseEntity } from '../../base/domain.types';
+import { Filter } from '../../base/filter.types';
+import { Sort } from '../../base/sort.types';
 import { composeUrl, createQuery } from '../../util/url-helpers';
 
 /** Base API CRUD service for any DTO type. Cannot be injected itself. */

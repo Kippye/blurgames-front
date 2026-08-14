@@ -2,15 +2,15 @@ import { Component, inject, Input, signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { GenreService } from './genre.service';
 import { IGenre } from './genre.types';
-import { IResult, ResultFactory } from '../../base/base.types';
-import { BaseAddModalHeader } from '../../base/components/modal-header.component';
-import { BaseDeleteModalFooter } from '../../base/components/delete-modal-footer.component';
+import { IResult, ResultFactory } from '../../base/result.types';
+import { ModalHeader } from '../../base/modals/modal-header.comp';
+import { DeleteModalFooter } from '../../base/modals/delete-modal-footer.comp';
 
 @Component({
   selector: 'app-genre-delete-modal',
-  imports: [BaseAddModalHeader, BaseDeleteModalFooter],
+  imports: [ModalHeader, DeleteModalFooter],
   template: `
-    <app-add-modal-header
+    <app-modal-header
       action="Delete"
       entityName="Genre"
       (modalClose)="activeModal.dismiss('Closed')"
@@ -29,7 +29,7 @@ import { BaseDeleteModalFooter } from '../../base/components/delete-modal-footer
     </div>
     <app-delete-modal-footer
       [isLoading]="deleteState().loading"
-      (delete)="handleDelete()"
+      (delete)="deleteGenre()"
       (modalCancel)="activeModal.close(false)"
     />
   `,
@@ -42,7 +42,7 @@ export class GenreDeleteModalComponent {
 
   deleteState = signal<IResult<void>>(ResultFactory.empty());
 
-  handleDelete() {
+  deleteGenre() {
     this.deleteState.set(ResultFactory.loading());
 
     this.genreService.delete(this.itemToDelete.id).subscribe({

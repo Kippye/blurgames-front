@@ -1,30 +1,25 @@
 import { Component, input, output } from '@angular/core';
 
 @Component({
-  selector: 'app-add-modal-footer',
+  selector: 'app-delete-modal-footer',
   imports: [],
   template: `
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" (click)="modalCancel.emit()">Cancel</button>
-      <button
-        type="button"
-        class="btn btn-primary"
-        (click)="create.emit()"
-        [disabled]="isLoading()"
-      >
+      <button type="button" class="btn btn-danger" (click)="delete.emit()" [disabled]="isLoading()">
         @if (isLoading()) {
           <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-          Creating...
+          Deleting...
         } @else {
-          Create
+          Delete
         }
       </button>
     </div>
   `,
   styles: ``,
 })
-export class BaseAddModalFooter {
+export class DeleteModalFooter {
   isLoading = input<boolean>(false);
   modalCancel = output();
-  create = output();
+  delete = output();
 }

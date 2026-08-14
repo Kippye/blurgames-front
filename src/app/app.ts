@@ -1,6 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NavComponent } from './layout/nav.component';
+import { NavComponent } from './layout/nav.comp';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +15,4 @@ import { NavComponent } from './layout/nav.component';
   `,
   styles: [],
 })
-export class App {
-  protected readonly title = signal('blurgames');
-}
+export class App {}

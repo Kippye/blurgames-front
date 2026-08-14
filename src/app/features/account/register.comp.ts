@@ -78,11 +78,11 @@ import { ValidationErrorsComponent } from '../validation/validation.errors';
   styles: `
     .ng-valid[required],
     .ng-valid.required {
-      border-left: 5px solid #42a948; /* green */
+      border-left: 5px solid #42a948;
     }
-    // .ng-invalid:not(form) {
-    //   border-left: 5px solid #a94442; /* red */
-    // }
+    /* .ng-invalid:not(form) {
+       border-left: 5px solid #a94442;
+    }*/
     .form-group {
       margin-bottom: 1rem;
     }

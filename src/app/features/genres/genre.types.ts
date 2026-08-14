@@ -1,4 +1,4 @@
-import type { IBaseEntity } from '../../base/base.types';
+import type { IBaseEntity } from '../../base/domain.types';
 
 export interface IGenre extends IBaseEntity {
   genreName: string;

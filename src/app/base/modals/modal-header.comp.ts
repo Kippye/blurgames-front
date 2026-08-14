@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 
 @Component({
-  selector: 'app-add-modal-header',
+  selector: 'app-modal-header',
   imports: [],
   template: `
     <div class="modal-header">
@@ -16,7 +16,7 @@ import { Component, input, output } from '@angular/core';
   `,
   styles: ``,
 })
-export class BaseAddModalHeader {
+export class ModalHeader {
   action = input.required<'Add new' | 'Edit' | 'Delete'>();
   entityName = input.required<string>();
   modalClose = output();

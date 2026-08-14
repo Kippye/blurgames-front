@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from './core/auth/auth.guard';
-import { Home } from './home/home.component';
 import { adminGuard } from './core/auth/auth.guard.admin';
+import { Home } from './home/home.comp';
 
 export const routes: Routes = [
   {
@@ -12,18 +12,18 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    loadComponent: () => import('./features/account/login.component').then((m) => m.LoginComponent),
+    loadComponent: () => import('./features/account/login.comp').then((m) => m.LoginComponent),
   },
   {
     path: 'register',
     loadComponent: () =>
-      import('./features/account/register.component').then((m) => m.RegisterComponent),
+      import('./features/account/register.comp').then((m) => m.RegisterComponent),
   },
   {
     path: 'admin/genres',
     canActivate: [authGuard, adminGuard],
     loadComponent: () =>
-      import('./features/admin/admin.genres.component').then((m) => m.AdminGenresComponent),
+      import('./features/admin/admin.genres.comp').then((m) => m.AdminGenresComponent),
   },
   { path: '**', redirectTo: '' },
 ];

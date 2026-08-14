@@ -24,7 +24,7 @@ describe('errorInterceptor', () => {
 
   afterEach(() => {
     // Verify that none of the tests make any extra HTTP requests.
-    TestBed.inject(HttpTestingController).verify();
+    httpTesting.verify();
   });
 
   it('passes successful responses through', async () => {

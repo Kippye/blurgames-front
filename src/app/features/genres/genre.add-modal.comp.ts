@@ -1,13 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { BaseFormControlComponent } from '../../base/base.form-control.component';
+import { BaseFormControlComponent } from '../../base/forms/form-control.comp';
 import { GenreService } from './genre.service';
 import { IGenre, IGenreCreate } from './genre.types';
-import { IResult, ResultFactory } from '../../base/base.types';
+import { IResult, ResultFactory } from '../../base/result.types';
 import { ValidationErrorsComponent } from '../validation/validation.errors';
-import { BaseAddModalHeader } from '../../base/components/modal-header.component';
-import { BaseAddModalFooter } from '../../base/components/add-modal-footer.component';
+import { ModalHeader } from '../../base/modals/modal-header.comp';
+import { AddModalFooter } from '../../base/modals/add-modal-footer.comp';
 
 @Component({
   selector: 'app-genre-add-modal',
@@ -15,17 +15,17 @@ import { BaseAddModalFooter } from '../../base/components/add-modal-footer.compo
     ReactiveFormsModule,
     BaseFormControlComponent,
     ValidationErrorsComponent,
-    BaseAddModalHeader,
-    BaseAddModalFooter,
+    ModalHeader,
+    AddModalFooter,
   ],
   template: `
-    <app-add-modal-header
+    <app-modal-header
       action="Add new"
       entityName="Genre"
       (modalClose)="activeModal.dismiss('Closed')"
     />
     <div class="modal-body">
-      <form [formGroup]="addForm" (ngSubmit)="handleCreate()">
+      <form [formGroup]="addForm" (ngSubmit)="createGenre()">
         <app-form-control id="genreName" label="Name" required>
           <input
             type="text"
@@ -50,7 +50,7 @@ import { BaseAddModalFooter } from '../../base/components/add-modal-footer.compo
     </div>
     <app-add-modal-footer
       [isLoading]="createState().loading"
-      (create)="handleCreate()"
+      (create)="createGenre()"
       (modalCancel)="activeModal.close(false)"
     />
   `,
@@ -69,7 +69,7 @@ export class GenreAddModalComponent {
     genreDescription: [''],
   });
 
-  handleCreate() {
+  createGenre() {
     this.addForm.markAllAsTouched();
     this.submitted.update((v) => !v);
     if (this.addForm.invalid) {

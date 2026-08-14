@@ -1,10 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { GenreService } from '../genres/genre.service';
 import { IGenre } from '../genres/genre.types';
-import { GenreAddModalComponent } from '../genres/genre.add-modal.component';
+import { GenreAddModalComponent } from '../genres/genre.add-modal.comp';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { GenreDeleteModalComponent } from '../genres/genre.delete-modal.component';
+import { GenreDeleteModalComponent } from '../genres/genre.delete-modal.comp';
 
 @Component({
   selector: 'app-admin-genres',
