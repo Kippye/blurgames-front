@@ -26,7 +26,7 @@ import { Observable } from 'rxjs';
     />
     <div class="modal-body">
       <form [formGroup]="createForm" (ngSubmit)="create()">
-        <app-form-control id="genreName" label="Name" required>
+        <app-form-control inputId="genreName" label="Name" required>
           <input
             type="text"
             class="form-control"
@@ -40,7 +40,7 @@ import { Observable } from 'rxjs';
           [submitted]="submitted()"
         />
 
-        <app-form-control id="genreDescription" label="Description">
+        <app-form-control inputId="genreDescription" label="Description">
           <textarea class="form-control" id="genreDescription" formControlName="genreDescription">
           </textarea>
         </app-form-control>

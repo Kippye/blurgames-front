@@ -22,12 +22,12 @@ import { Observable } from 'rxjs';
     <app-modal-header action="Edit" entityName="Tag" (modalClose)="activeModal.dismiss('Closed')" />
     <div class="modal-body">
       <form [formGroup]="editForm" (ngSubmit)="submit()">
-        <app-form-control id="tagName" label="Name" required>
+        <app-form-control inputId="tagName" label="Name" required>
           <input type="text" class="form-control" id="tagName" formControlName="tagName" required />
         </app-form-control>
         <app-validation-errors [control]="editForm.controls.tagName" [submitted]="submitted()" />
 
-        <app-form-control id="tagDescription" label="Description">
+        <app-form-control inputId="tagDescription" label="Description">
           <textarea class="form-control" id="tagDescription" formControlName="tagDescription">
           </textarea>
         </app-form-control>

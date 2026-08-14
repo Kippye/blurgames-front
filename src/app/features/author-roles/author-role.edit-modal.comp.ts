@@ -26,7 +26,7 @@ import { Observable } from 'rxjs';
     />
     <div class="modal-body">
       <form [formGroup]="editForm" (ngSubmit)="submit()">
-        <app-form-control id="authorRoleName" label="Name" required>
+        <app-form-control inputId="authorRoleName" label="Name" required>
           <input
             type="text"
             class="form-control"

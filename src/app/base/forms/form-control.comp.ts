@@ -5,7 +5,7 @@ import { booleanAttribute, Component, input } from '@angular/core';
   imports: [],
   template: ` <div class="mb-3">
     @if (label()) {
-      <label [htmlFor]="id()" class="form-label">
+      <label [htmlFor]="inputId()" class="form-label">
         {{ label() }}
         @if (required()) {
           <span class="text-primary">*</span>
@@ -17,7 +17,7 @@ import { booleanAttribute, Component, input } from '@angular/core';
   styles: ``,
 })
 export class BaseFormControlComponent {
-  id = input<string>();
+  inputId = input<string>();
   label = input<string>();
   required = input(false, { transform: booleanAttribute });
 }
