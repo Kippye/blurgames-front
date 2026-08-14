@@ -1,26 +1,26 @@
 import { Component, inject, signal } from '@angular/core';
-import { GenreService } from '../genres/genre.service';
-import { IGenre } from '../genres/genre.types';
-import { GenreCreateModalComponent } from '../genres/genre.create-modal.comp';
+import { AuthorRoleService } from '../author-roles/author-role.service';
+import { IAuthorRole } from '../author-roles/author-role.types';
+import { AuthorRoleCreateModalComponent } from '../author-roles/author-role.create-modal.comp';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { GenreDeleteModalComponent } from '../genres/genre.delete-modal.comp';
-import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
+import { AuthorRoleDeleteModalComponent } from '../author-roles/author-role.delete-modal.comp';
+import { AuthorRoleEditModalComponent } from '../author-roles/author-role.edit-modal.comp';
 
 @Component({
-  selector: 'app-admin-genres',
+  selector: 'app-admin-author-roles',
   template: `
-    <h1>Genres</h1>
+    <h1>Author Roles</h1>
 
-    @if (genresResource.isLoading()) {
+    @if (authorRolesResource.isLoading()) {
       <div class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
       </div>
-    } @else if (genresResource.error()) {
+    } @else if (authorRolesResource.error()) {
       <div class="alert alert-danger">
-        {{ genresResource.error()?.message }}
+        {{ authorRolesResource.error()?.message }}
       </div>
     } @else {
       <div>
@@ -34,15 +34,14 @@ import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
             </tr>
           </thead>
           <tbody>
-            @for (genre of genresResource.value(); track genre.id) {
+            @for (authorRole of authorRolesResource.value(); track authorRole.id) {
               <tr>
-                <td>{{ genre.genreName }}</td>
-                <td>{{ genre.genreDescription }}</td>
+                <td>{{ authorRole.authorRoleName }}</td>
                 <td>
-                  <button class="btn btn-primary btn-sm me-2" (click)="openEditModal(genre)">
+                  <button class="btn btn-primary btn-sm me-2" (click)="openEditModal(authorRole)">
                     Edit
                   </button>
-                  <button class="btn btn-danger btn-sm" (click)="openDeleteModal(genre)">
+                  <button class="btn btn-danger btn-sm" (click)="openDeleteModal(authorRole)">
                     Delete
                   </button>
                 </td>
@@ -55,22 +54,22 @@ import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
   `,
   styles: ``,
 })
-export class AdminGenresComponent {
-  private readonly genreService = inject(GenreService);
+export class AdminAuthorRolesComponent {
+  private readonly authorRoleService = inject(AuthorRoleService);
   private modalService = inject(NgbModal);
 
-  selectedItem = signal<IGenre | null>(null);
+  selectedItem = signal<IAuthorRole | null>(null);
 
-  genresResource = rxResource({
-    stream: () => this.genreService.getCollection({ sort: { key: 'genreName' } }),
+  authorRolesResource = rxResource({
+    stream: () => this.authorRoleService.getCollection({ sort: { key: 'authorRoleName' } }),
   });
 
   refreshData() {
-    this.genresResource.reload();
+    this.authorRolesResource.reload();
   }
 
   openCreateModal() {
-    this.modalService.open(GenreCreateModalComponent, { centered: true }).result.then(
+    this.modalService.open(AuthorRoleCreateModalComponent, { centered: true }).result.then(
       (result) => {
         if (result) {
           this.refreshData();
@@ -82,9 +81,9 @@ export class AdminGenresComponent {
     );
   }
 
-  openEditModal(genre: IGenre) {
-    this.selectedItem.set(genre);
-    const modalRef = this.modalService.open(GenreEditModalComponent, { centered: true });
+  openEditModal(authorRole: IAuthorRole) {
+    this.selectedItem.set(authorRole);
+    const modalRef = this.modalService.open(AuthorRoleEditModalComponent, { centered: true });
     modalRef.componentInstance.itemToEdit = this.selectedItem();
 
     modalRef.result.then(
@@ -100,9 +99,9 @@ export class AdminGenresComponent {
     );
   }
 
-  openDeleteModal(genre: IGenre) {
-    this.selectedItem.set(genre);
-    const modalRef = this.modalService.open(GenreDeleteModalComponent, { centered: true });
+  openDeleteModal(authorRole: IAuthorRole) {
+    this.selectedItem.set(authorRole);
+    const modalRef = this.modalService.open(AuthorRoleDeleteModalComponent, { centered: true });
     modalRef.componentInstance.itemToDelete = this.selectedItem();
 
     modalRef.result.then(

@@ -1,26 +1,26 @@
 import { Component, inject, signal } from '@angular/core';
-import { GenreService } from '../genres/genre.service';
-import { IGenre } from '../genres/genre.types';
-import { GenreCreateModalComponent } from '../genres/genre.create-modal.comp';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { GenreDeleteModalComponent } from '../genres/genre.delete-modal.comp';
-import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
+import { ProjectTypeService } from '../project-types/project-type.service';
+import { IProjectType } from '../project-types/project-type.types';
+import { ProjectTypeCreateModalComponent } from '../project-types/project-type.create-modal.comp';
+import { ProjectTypeEditModalComponent } from '../project-types/project-type.edit-modal.comp';
+import { ProjectTypeDeleteModalComponent } from '../project-types/project-type.delete-modal.comp';
 
 @Component({
-  selector: 'app-admin-genres',
+  selector: 'app-admin-project-types',
   template: `
-    <h1>Genres</h1>
+    <h1>Project Types</h1>
 
-    @if (genresResource.isLoading()) {
+    @if (projectTypesResource.isLoading()) {
       <div class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
       </div>
-    } @else if (genresResource.error()) {
+    } @else if (projectTypesResource.error()) {
       <div class="alert alert-danger">
-        {{ genresResource.error()?.message }}
+        {{ projectTypesResource.error()?.message }}
       </div>
     } @else {
       <div>
@@ -34,15 +34,15 @@ import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
             </tr>
           </thead>
           <tbody>
-            @for (genre of genresResource.value(); track genre.id) {
+            @for (projectType of projectTypesResource.value(); track projectType.id) {
               <tr>
-                <td>{{ genre.genreName }}</td>
-                <td>{{ genre.genreDescription }}</td>
+                <td>{{ projectType.projectTypeName }}</td>
+                <td>{{ projectType.projectTypeDescription }}</td>
                 <td>
-                  <button class="btn btn-primary btn-sm me-2" (click)="openEditModal(genre)">
+                  <button class="btn btn-primary btn-sm me-2" (click)="openEditModal(projectType)">
                     Edit
                   </button>
-                  <button class="btn btn-danger btn-sm" (click)="openDeleteModal(genre)">
+                  <button class="btn btn-danger btn-sm" (click)="openDeleteModal(projectType)">
                     Delete
                   </button>
                 </td>
@@ -55,22 +55,22 @@ import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
   `,
   styles: ``,
 })
-export class AdminGenresComponent {
-  private readonly genreService = inject(GenreService);
+export class AdminProjectTypesComponent {
+  private readonly projectTypeService = inject(ProjectTypeService);
   private modalService = inject(NgbModal);
 
-  selectedItem = signal<IGenre | null>(null);
+  selectedItem = signal<IProjectType | null>(null);
 
-  genresResource = rxResource({
-    stream: () => this.genreService.getCollection({ sort: { key: 'genreName' } }),
+  projectTypesResource = rxResource({
+    stream: () => this.projectTypeService.getCollection({ sort: { key: 'projectTypeName' } }),
   });
 
   refreshData() {
-    this.genresResource.reload();
+    this.projectTypesResource.reload();
   }
 
   openCreateModal() {
-    this.modalService.open(GenreCreateModalComponent, { centered: true }).result.then(
+    this.modalService.open(ProjectTypeCreateModalComponent, { centered: true }).result.then(
       (result) => {
         if (result) {
           this.refreshData();
@@ -82,9 +82,9 @@ export class AdminGenresComponent {
     );
   }
 
-  openEditModal(genre: IGenre) {
-    this.selectedItem.set(genre);
-    const modalRef = this.modalService.open(GenreEditModalComponent, { centered: true });
+  openEditModal(projectType: IProjectType) {
+    this.selectedItem.set(projectType);
+    const modalRef = this.modalService.open(ProjectTypeEditModalComponent, { centered: true });
     modalRef.componentInstance.itemToEdit = this.selectedItem();
 
     modalRef.result.then(
@@ -100,9 +100,9 @@ export class AdminGenresComponent {
     );
   }
 
-  openDeleteModal(genre: IGenre) {
-    this.selectedItem.set(genre);
-    const modalRef = this.modalService.open(GenreDeleteModalComponent, { centered: true });
+  openDeleteModal(projectType: IProjectType) {
+    this.selectedItem.set(projectType);
+    const modalRef = this.modalService.open(ProjectTypeDeleteModalComponent, { centered: true });
     modalRef.componentInstance.itemToDelete = this.selectedItem();
 
     modalRef.result.then(

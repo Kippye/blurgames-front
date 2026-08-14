@@ -1,26 +1,26 @@
 import { Component, inject, signal } from '@angular/core';
-import { GenreService } from '../genres/genre.service';
-import { IGenre } from '../genres/genre.types';
-import { GenreCreateModalComponent } from '../genres/genre.create-modal.comp';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { GenreDeleteModalComponent } from '../genres/genre.delete-modal.comp';
-import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
+import { TagService } from '../tags/tag.service';
+import { ITag } from '../tags/tag.types';
+import { TagCreateModalComponent } from '../tags/tag.create-modal.comp';
+import { TagEditModalComponent } from '../tags/tag.edit-modal.comp';
+import { TagDeleteModalComponent } from '../tags/tag.delete-modal.comp';
 
 @Component({
-  selector: 'app-admin-genres',
+  selector: 'app-admin-tags',
   template: `
-    <h1>Genres</h1>
+    <h1>Tags</h1>
 
-    @if (genresResource.isLoading()) {
+    @if (tagsResource.isLoading()) {
       <div class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
       </div>
-    } @else if (genresResource.error()) {
+    } @else if (tagsResource.error()) {
       <div class="alert alert-danger">
-        {{ genresResource.error()?.message }}
+        {{ tagsResource.error()?.message }}
       </div>
     } @else {
       <div>
@@ -34,15 +34,15 @@ import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
             </tr>
           </thead>
           <tbody>
-            @for (genre of genresResource.value(); track genre.id) {
+            @for (tag of tagsResource.value(); track tag.id) {
               <tr>
-                <td>{{ genre.genreName }}</td>
-                <td>{{ genre.genreDescription }}</td>
+                <td>{{ tag.tagName }}</td>
+                <td>{{ tag.tagDescription }}</td>
                 <td>
-                  <button class="btn btn-primary btn-sm me-2" (click)="openEditModal(genre)">
+                  <button class="btn btn-primary btn-sm me-2" (click)="openEditModal(tag)">
                     Edit
                   </button>
-                  <button class="btn btn-danger btn-sm" (click)="openDeleteModal(genre)">
+                  <button class="btn btn-danger btn-sm" (click)="openDeleteModal(tag)">
                     Delete
                   </button>
                 </td>
@@ -55,22 +55,22 @@ import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
   `,
   styles: ``,
 })
-export class AdminGenresComponent {
-  private readonly genreService = inject(GenreService);
+export class AdminTagsComponent {
+  private readonly tagService = inject(TagService);
   private modalService = inject(NgbModal);
 
-  selectedItem = signal<IGenre | null>(null);
+  selectedItem = signal<ITag | null>(null);
 
-  genresResource = rxResource({
-    stream: () => this.genreService.getCollection({ sort: { key: 'genreName' } }),
+  tagsResource = rxResource({
+    stream: () => this.tagService.getCollection({ sort: { key: 'tagName' } }),
   });
 
   refreshData() {
-    this.genresResource.reload();
+    this.tagsResource.reload();
   }
 
   openCreateModal() {
-    this.modalService.open(GenreCreateModalComponent, { centered: true }).result.then(
+    this.modalService.open(TagCreateModalComponent, { centered: true }).result.then(
       (result) => {
         if (result) {
           this.refreshData();
@@ -82,9 +82,9 @@ export class AdminGenresComponent {
     );
   }
 
-  openEditModal(genre: IGenre) {
-    this.selectedItem.set(genre);
-    const modalRef = this.modalService.open(GenreEditModalComponent, { centered: true });
+  openEditModal(tag: ITag) {
+    this.selectedItem.set(tag);
+    const modalRef = this.modalService.open(TagEditModalComponent, { centered: true });
     modalRef.componentInstance.itemToEdit = this.selectedItem();
 
     modalRef.result.then(
@@ -100,9 +100,9 @@ export class AdminGenresComponent {
     );
   }
 
-  openDeleteModal(genre: IGenre) {
-    this.selectedItem.set(genre);
-    const modalRef = this.modalService.open(GenreDeleteModalComponent, { centered: true });
+  openDeleteModal(tag: ITag) {
+    this.selectedItem.set(tag);
+    const modalRef = this.modalService.open(TagDeleteModalComponent, { centered: true });
     modalRef.componentInstance.itemToDelete = this.selectedItem();
 
     modalRef.result.then(
