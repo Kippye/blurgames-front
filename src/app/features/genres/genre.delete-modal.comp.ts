@@ -1,10 +1,10 @@
-import { Component, inject, Input, signal } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { Component, inject, Input } from '@angular/core';
 import { GenreService } from './genre.service';
 import { IGenre } from './genre.types';
-import { IResult, ResultFactory } from '../../base/result.types';
 import { ModalHeader } from '../../base/modals/modal-header.comp';
 import { DeleteModalFooter } from '../../base/modals/delete-modal-footer.comp';
+import { DeleteModalComponent } from '../../base/modals/delete-modal.dir';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-genre-delete-modal',
@@ -18,7 +18,8 @@ import { DeleteModalFooter } from '../../base/modals/delete-modal-footer.comp';
     <div class="modal-body">
       <p>
         Are you sure you want to delete the genre
-        {{ itemToDelete.genreName }}?
+        <strong>{{ itemToDelete.genreName }}</strong
+        >?
       </p>
       <p class="text-muted">This action cannot be undone.</p>
       @if (deleteState().error) {
@@ -29,31 +30,17 @@ import { DeleteModalFooter } from '../../base/modals/delete-modal-footer.comp';
     </div>
     <app-delete-modal-footer
       [isLoading]="deleteState().loading"
-      (delete)="deleteGenre()"
+      (delete)="submit()"
       (modalCancel)="activeModal.close(false)"
     />
   `,
   styles: ``,
 })
-export class GenreDeleteModalComponent {
-  activeModal = inject(NgbActiveModal);
+export class GenreDeleteModalComponent extends DeleteModalComponent {
   genreService = inject(GenreService);
   @Input({ required: true }) itemToDelete!: IGenre;
 
-  deleteState = signal<IResult<void>>(ResultFactory.empty());
-
-  deleteGenre() {
-    this.deleteState.set(ResultFactory.loading());
-
-    this.genreService.delete(this.itemToDelete.id).subscribe({
-      next: () => {
-        // NOTE: Delete returns no data, so we just revert to empty
-        this.deleteState.set(ResultFactory.empty());
-        this.activeModal.close(true);
-      },
-      error: (error: Error) => {
-        this.deleteState.set(ResultFactory.error(error!.message));
-      },
-    });
+  override delete(): Observable<void> {
+    return this.genreService.delete(this.itemToDelete.id);
   }
 }

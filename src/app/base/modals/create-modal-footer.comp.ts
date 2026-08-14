@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 
 @Component({
-  selector: 'app-add-modal-footer',
+  selector: 'app-create-modal-footer',
   imports: [],
   template: `
     <div class="modal-footer">
@@ -23,7 +23,7 @@ import { Component, input, output } from '@angular/core';
   `,
   styles: ``,
 })
-export class AddModalFooter {
+export class CreateModalFooter {
   isLoading = input<boolean>(false);
   modalCancel = output();
   create = output();

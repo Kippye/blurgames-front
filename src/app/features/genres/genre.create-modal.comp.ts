@@ -1,31 +1,31 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { BaseFormControlComponent } from '../../base/forms/form-control.comp';
 import { GenreService } from './genre.service';
 import { IGenre, IGenreCreate } from './genre.types';
-import { IResult, ResultFactory } from '../../base/result.types';
 import { ValidationErrorsComponent } from '../validation/validation.errors';
 import { ModalHeader } from '../../base/modals/modal-header.comp';
-import { AddModalFooter } from '../../base/modals/add-modal-footer.comp';
+import { CreateModalFooter } from '../../base/modals/create-modal-footer.comp';
+import { CreateModalComponent } from '../../base/modals/create-modal.dir';
+import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'app-genre-add-modal',
+  selector: 'app-genre-create-modal',
   imports: [
     ReactiveFormsModule,
     BaseFormControlComponent,
     ValidationErrorsComponent,
     ModalHeader,
-    AddModalFooter,
+    CreateModalFooter,
   ],
   template: `
     <app-modal-header
-      action="Add new"
+      action="Create"
       entityName="Genre"
       (modalClose)="activeModal.dismiss('Closed')"
     />
     <div class="modal-body">
-      <form [formGroup]="addForm" (ngSubmit)="createGenre()">
+      <form [formGroup]="createForm" (ngSubmit)="create()">
         <app-form-control id="genreName" label="Name" required>
           <input
             type="text"
@@ -35,7 +35,10 @@ import { AddModalFooter } from '../../base/modals/add-modal-footer.comp';
             required
           />
         </app-form-control>
-        <app-validation-errors [control]="addForm.controls.genreName" [submitted]="submitted()" />
+        <app-validation-errors
+          [control]="createForm.controls.genreName"
+          [submitted]="submitted()"
+        />
 
         <app-form-control id="genreDescription" label="Description">
           <textarea class="form-control" id="genreDescription" formControlName="genreDescription">
@@ -48,49 +51,29 @@ import { AddModalFooter } from '../../base/modals/add-modal-footer.comp';
         </div>
       }
     </div>
-    <app-add-modal-footer
+    <app-create-modal-footer
       [isLoading]="createState().loading"
-      (create)="createGenre()"
+      (create)="submit()"
       (modalCancel)="activeModal.close(false)"
     />
   `,
   styles: ``,
 })
-export class GenreAddModalComponent {
-  activeModal = inject(NgbActiveModal);
+export class GenreCreateModalComponent extends CreateModalComponent<IGenre> {
   fb = inject(FormBuilder);
   genreService = inject(GenreService);
 
-  submitted = signal(false);
-  createState = signal<IResult<IGenre>>(ResultFactory.empty());
-
-  addForm = this.fb.nonNullable.group({
+  createForm = this.fb.nonNullable.group({
     genreName: ['', Validators.required],
     genreDescription: [''],
   });
 
-  createGenre() {
-    this.addForm.markAllAsTouched();
-    this.submitted.update((v) => !v);
-    if (this.addForm.invalid) {
-      return;
-    }
-
-    this.createState.set(ResultFactory.loading());
-
+  override create(): Observable<IGenre> {
     const genreCreate: IGenreCreate = {
-      genreName: this.addForm.controls.genreName.value,
-      genreDescription: this.addForm.controls.genreDescription.value,
+      genreName: this.createForm.controls.genreName.value,
+      genreDescription: this.createForm.controls.genreDescription.value,
     };
 
-    this.genreService.create(genreCreate).subscribe({
-      next: (created) => {
-        this.createState.set(ResultFactory.success(created));
-        this.activeModal.close(created);
-      },
-      error: (error: Error) => {
-        this.createState.set(ResultFactory.error(error!.message));
-      },
-    });
+    return this.genreService.create(genreCreate);
   }
 }

@@ -17,7 +17,7 @@ import { Component, input, output } from '@angular/core';
   styles: ``,
 })
 export class ModalHeader {
-  action = input.required<'Add new' | 'Edit' | 'Delete'>();
+  action = input.required<'Create' | 'Edit' | 'Delete'>();
   entityName = input.required<string>();
   modalClose = output();
 }

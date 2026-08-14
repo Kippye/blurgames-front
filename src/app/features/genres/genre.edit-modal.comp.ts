@@ -1,13 +1,13 @@
-import { Component, inject, Input, OnInit, signal } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { BaseFormControlComponent } from '../../base/forms/form-control.comp';
 import { GenreService } from './genre.service';
 import { IGenre } from './genre.types';
-import { IResult, ResultFactory } from '../../base/result.types';
 import { ValidationErrorsComponent } from '../validation/validation.errors';
 import { ModalHeader } from '../../base/modals/modal-header.comp';
 import { EditModalFooter } from '../../base/modals/edit-modal-footer.comp';
+import { EditModalComponent } from '../../base/modals/edit-modal.dir';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-genre-add-modal',
@@ -25,7 +25,7 @@ import { EditModalFooter } from '../../base/modals/edit-modal-footer.comp';
       (modalClose)="activeModal.dismiss('Closed')"
     />
     <div class="modal-body">
-      <form [formGroup]="editForm" (ngSubmit)="updateGenre()">
+      <form [formGroup]="editForm" (ngSubmit)="submit()">
         <app-form-control id="genreName" label="Name" required>
           <input
             type="text"
@@ -51,62 +51,36 @@ import { EditModalFooter } from '../../base/modals/edit-modal-footer.comp';
     <app-edit-modal-footer
       [isLoading]="editState().loading"
       [isPristine]="editForm.pristine"
-      (save)="updateGenre()"
+      (save)="submit()"
       (modalCancel)="activeModal.close(false)"
     />
   `,
   styles: ``,
 })
-export class GenreEditModalComponent implements OnInit {
-  activeModal = inject(NgbActiveModal);
+export class GenreEditModalComponent extends EditModalComponent<IGenre> implements OnInit {
   fb = inject(FormBuilder);
   genreService = inject(GenreService);
   @Input({ required: true }) itemToEdit!: IGenre;
-
-  submitted = signal(false);
-  editState = signal<IResult<IGenre>>(ResultFactory.empty());
 
   editForm = this.fb.nonNullable.group({
     genreName: ['', Validators.required],
     genreDescription: [''],
   });
 
-  prefillForm(): void {
-    this.editForm.controls.genreName.setValue(this.itemToEdit.genreName);
-    this.editForm.controls.genreDescription.setValue(this.itemToEdit.genreDescription);
+  override prefillForm(): void {
+    this.editForm.patchValue({
+      genreName: this.itemToEdit.genreName,
+      genreDescription: this.itemToEdit.genreDescription,
+    });
   }
 
-  ngOnInit(): void {
-    this.prefillForm();
-  }
-
-  updateGenre() {
-    // Don't allow updating when nothing was changed - pointless request
-    if (this.editForm.pristine) {
-      return;
-    }
-    this.editForm.markAllAsTouched();
-    this.submitted.update((v) => !v);
-    if (this.editForm.invalid) {
-      return;
-    }
-
-    this.editState.set(ResultFactory.loading());
-
+  override saveChanges(): Observable<IGenre> {
     const genreUpdate: IGenre = {
       id: this.itemToEdit.id,
       genreName: this.editForm.controls.genreName.value,
       genreDescription: this.editForm.controls.genreDescription.value,
     };
 
-    this.genreService.update(genreUpdate).subscribe({
-      next: (updated) => {
-        this.editState.set(ResultFactory.success(updated));
-        this.activeModal.close(updated);
-      },
-      error: (error: Error) => {
-        this.editState.set(ResultFactory.error(error!.message));
-      },
-    });
+    return this.genreService.update(genreUpdate);
   }
 }

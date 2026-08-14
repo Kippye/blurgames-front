@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { GenreService } from '../genres/genre.service';
 import { IGenre } from '../genres/genre.types';
-import { GenreAddModalComponent } from '../genres/genre.add-modal.comp';
+import { GenreCreateModalComponent } from '../genres/genre.create-modal.comp';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { GenreDeleteModalComponent } from '../genres/genre.delete-modal.comp';
@@ -24,7 +24,7 @@ import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
       </div>
     } @else {
       <div>
-        <button class="btn btn-primary mb-3" (click)="openAddModal()">Add</button>
+        <button class="btn btn-primary mb-3" (click)="openCreateModal()">Create</button>
         <table class="table">
           <thead>
             <tr>
@@ -70,8 +70,8 @@ export class AdminGenresComponent {
     this.genresResource.reload();
   }
 
-  openAddModal() {
-    this.modalService.open(GenreAddModalComponent, { centered: true }).result.then(
+  openCreateModal() {
+    this.modalService.open(GenreCreateModalComponent, { centered: true }).result.then(
       (result) => {
         if (result) {
           this.refreshData();
