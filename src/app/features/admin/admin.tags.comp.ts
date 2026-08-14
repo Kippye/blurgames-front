@@ -6,6 +6,7 @@ import { ITag } from '../tags/tag.types';
 import { TagCreateModalComponent } from '../tags/tag.create-modal.comp';
 import { TagEditModalComponent } from '../tags/tag.edit-modal.comp';
 import { TagDeleteModalComponent } from '../tags/tag.delete-modal.comp';
+import { TableColumns, AdminTableComponent } from './admin.table.comp';
 
 @Component({
   selector: 'app-admin-tags',
@@ -22,44 +23,32 @@ import { TagDeleteModalComponent } from '../tags/tag.delete-modal.comp';
       <div class="alert alert-danger">
         {{ tagsResource.error()?.message }}
       </div>
-    } @else {
+    } @else if (tagsResource.hasValue()) {
       <div>
         <button class="btn btn-primary mb-3" (click)="openCreateModal()">Create</button>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (tag of tagsResource.value(); track tag.id) {
-              <tr>
-                <td>{{ tag.tagName }}</td>
-                <td>{{ tag.tagDescription }}</td>
-                <td>
-                  <button class="btn btn-primary btn-sm me-2" (click)="openEditModal(tag)">
-                    Edit
-                  </button>
-                  <button class="btn btn-danger btn-sm" (click)="openDeleteModal(tag)">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+        <app-admin-table
+          [items]="tagsResource.value()"
+          [columns]="propertyColumns"
+          (editClick)="openEditModal($event)"
+          (deleteClick)="openDeleteModal($event)"
+          numberColumn
+        />
       </div>
     }
   `,
   styles: ``,
+  imports: [AdminTableComponent],
 })
 export class AdminTagsComponent {
   private readonly tagService = inject(TagService);
   private modalService = inject(NgbModal);
 
   selectedItem = signal<ITag | null>(null);
+
+  propertyColumns: TableColumns<ITag> = new Map([
+    ['tagName', 'Name'],
+    ['tagDescription', 'Description'],
+  ]);
 
   tagsResource = rxResource({
     stream: () => this.tagService.getCollection({ sort: { key: 'tagName' } }),
@@ -70,16 +59,11 @@ export class AdminTagsComponent {
   }
 
   openCreateModal() {
-    this.modalService.open(TagCreateModalComponent, { centered: true }).result.then(
-      (result) => {
-        if (result) {
-          this.refreshData();
-        }
-      },
-      (reason) => {
-        console.warn(reason);
-      },
-    );
+    this.modalService.open(TagCreateModalComponent, { centered: true }).result.then((result) => {
+      if (result) {
+        this.refreshData();
+      }
+    });
   }
 
   openEditModal(tag: ITag) {

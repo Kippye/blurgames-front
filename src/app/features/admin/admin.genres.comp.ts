@@ -6,6 +6,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { GenreDeleteModalComponent } from '../genres/genre.delete-modal.comp';
 import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
+import { TableColumns, AdminTableComponent } from './admin.table.comp';
 
 @Component({
   selector: 'app-admin-genres',
@@ -22,44 +23,32 @@ import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
       <div class="alert alert-danger">
         {{ genresResource.error()?.message }}
       </div>
-    } @else {
+    } @else if (genresResource.hasValue()) {
       <div>
         <button class="btn btn-primary mb-3" (click)="openCreateModal()">Create</button>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (genre of genresResource.value(); track genre.id) {
-              <tr>
-                <td>{{ genre.genreName }}</td>
-                <td>{{ genre.genreDescription }}</td>
-                <td>
-                  <button class="btn btn-primary btn-sm me-2" (click)="openEditModal(genre)">
-                    Edit
-                  </button>
-                  <button class="btn btn-danger btn-sm" (click)="openDeleteModal(genre)">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+        <app-admin-table
+          [items]="genresResource.value()"
+          [columns]="propertyColumns"
+          (editClick)="openEditModal($event)"
+          (deleteClick)="openDeleteModal($event)"
+          numberColumn
+        />
       </div>
     }
   `,
   styles: ``,
+  imports: [AdminTableComponent],
 })
 export class AdminGenresComponent {
   private readonly genreService = inject(GenreService);
   private modalService = inject(NgbModal);
 
   selectedItem = signal<IGenre | null>(null);
+
+  propertyColumns: TableColumns<IGenre> = new Map([
+    ['genreName', 'Name'],
+    ['genreDescription', 'Description'],
+  ]);
 
   genresResource = rxResource({
     stream: () => this.genreService.getCollection({ sort: { key: 'genreName' } }),
@@ -70,16 +59,11 @@ export class AdminGenresComponent {
   }
 
   openCreateModal() {
-    this.modalService.open(GenreCreateModalComponent, { centered: true }).result.then(
-      (result) => {
-        if (result) {
-          this.refreshData();
-        }
-      },
-      (reason) => {
-        console.warn(reason);
-      },
-    );
+    this.modalService.open(GenreCreateModalComponent, { centered: true }).result.then((result) => {
+      if (result) {
+        this.refreshData();
+      }
+    });
   }
 
   openEditModal(genre: IGenre) {

@@ -6,6 +6,7 @@ import { IProjectType } from '../project-types/project-type.types';
 import { ProjectTypeCreateModalComponent } from '../project-types/project-type.create-modal.comp';
 import { ProjectTypeEditModalComponent } from '../project-types/project-type.edit-modal.comp';
 import { ProjectTypeDeleteModalComponent } from '../project-types/project-type.delete-modal.comp';
+import { AdminTableComponent, TableColumns } from './admin.table.comp';
 
 @Component({
   selector: 'app-admin-project-types',
@@ -22,44 +23,32 @@ import { ProjectTypeDeleteModalComponent } from '../project-types/project-type.d
       <div class="alert alert-danger">
         {{ projectTypesResource.error()?.message }}
       </div>
-    } @else {
+    } @else if (projectTypesResource.hasValue()) {
       <div>
         <button class="btn btn-primary mb-3" (click)="openCreateModal()">Create</button>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (projectType of projectTypesResource.value(); track projectType.id) {
-              <tr>
-                <td>{{ projectType.projectTypeName }}</td>
-                <td>{{ projectType.projectTypeDescription }}</td>
-                <td>
-                  <button class="btn btn-primary btn-sm me-2" (click)="openEditModal(projectType)">
-                    Edit
-                  </button>
-                  <button class="btn btn-danger btn-sm" (click)="openDeleteModal(projectType)">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+        <app-admin-table
+          [items]="projectTypesResource.value()"
+          [columns]="propertyColumns"
+          (editClick)="openEditModal($event)"
+          (deleteClick)="openDeleteModal($event)"
+          numberColumn
+        />
       </div>
     }
   `,
   styles: ``,
+  imports: [AdminTableComponent],
 })
 export class AdminProjectTypesComponent {
   private readonly projectTypeService = inject(ProjectTypeService);
   private modalService = inject(NgbModal);
 
   selectedItem = signal<IProjectType | null>(null);
+
+  propertyColumns: TableColumns<IProjectType> = new Map([
+    ['projectTypeName', 'Name'],
+    ['projectTypeDescription', 'Description'],
+  ]);
 
   projectTypesResource = rxResource({
     stream: () => this.projectTypeService.getCollection({ sort: { key: 'projectTypeName' } }),
@@ -70,16 +59,13 @@ export class AdminProjectTypesComponent {
   }
 
   openCreateModal() {
-    this.modalService.open(ProjectTypeCreateModalComponent, { centered: true }).result.then(
-      (result) => {
+    this.modalService
+      .open(ProjectTypeCreateModalComponent, { centered: true })
+      .result.then((result) => {
         if (result) {
           this.refreshData();
         }
-      },
-      (reason) => {
-        console.warn(reason);
-      },
-    );
+      });
   }
 
   openEditModal(projectType: IProjectType) {

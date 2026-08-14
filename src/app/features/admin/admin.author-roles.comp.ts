@@ -6,6 +6,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { AuthorRoleDeleteModalComponent } from '../author-roles/author-role.delete-modal.comp';
 import { AuthorRoleEditModalComponent } from '../author-roles/author-role.edit-modal.comp';
+import { TableColumns, AdminTableComponent } from './admin.table.comp';
 
 @Component({
   selector: 'app-admin-author-roles',
@@ -22,43 +23,29 @@ import { AuthorRoleEditModalComponent } from '../author-roles/author-role.edit-m
       <div class="alert alert-danger">
         {{ authorRolesResource.error()?.message }}
       </div>
-    } @else {
+    } @else if (authorRolesResource.hasValue()) {
       <div>
         <button class="btn btn-primary mb-3" (click)="openCreateModal()">Create</button>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (authorRole of authorRolesResource.value(); track authorRole.id) {
-              <tr>
-                <td>{{ authorRole.authorRoleName }}</td>
-                <td>
-                  <button class="btn btn-primary btn-sm me-2" (click)="openEditModal(authorRole)">
-                    Edit
-                  </button>
-                  <button class="btn btn-danger btn-sm" (click)="openDeleteModal(authorRole)">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+        <app-admin-table
+          [items]="authorRolesResource.value()"
+          [columns]="propertyColumns"
+          (editClick)="openEditModal($event)"
+          (deleteClick)="openDeleteModal($event)"
+          numberColumn
+        />
       </div>
     }
   `,
   styles: ``,
+  imports: [AdminTableComponent],
 })
 export class AdminAuthorRolesComponent {
   private readonly authorRoleService = inject(AuthorRoleService);
   private modalService = inject(NgbModal);
 
   selectedItem = signal<IAuthorRole | null>(null);
+
+  propertyColumns: TableColumns<IAuthorRole> = new Map([['authorRoleName', 'Name']]);
 
   authorRolesResource = rxResource({
     stream: () => this.authorRoleService.getCollection({ sort: { key: 'authorRoleName' } }),
@@ -69,16 +56,13 @@ export class AdminAuthorRolesComponent {
   }
 
   openCreateModal() {
-    this.modalService.open(AuthorRoleCreateModalComponent, { centered: true }).result.then(
-      (result) => {
+    this.modalService
+      .open(AuthorRoleCreateModalComponent, { centered: true })
+      .result.then((result) => {
         if (result) {
           this.refreshData();
         }
-      },
-      (reason) => {
-        console.warn(reason);
-      },
-    );
+      });
   }
 
   openEditModal(authorRole: IAuthorRole) {
