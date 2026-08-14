@@ -59,11 +59,16 @@ export class AdminGenresComponent {
   }
 
   openCreateModal() {
-    this.modalService.open(GenreCreateModalComponent, { centered: true }).result.then((result) => {
-      if (result) {
-        this.refreshData();
-      }
-    });
+    this.modalService.open(GenreCreateModalComponent, { centered: true }).result.then(
+      (result) => {
+        if (result) {
+          this.refreshData();
+        }
+      },
+      () => {
+        /* empty */
+      },
+    );
   }
 
   openEditModal(genre: IGenre) {

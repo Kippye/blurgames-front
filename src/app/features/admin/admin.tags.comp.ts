@@ -59,11 +59,16 @@ export class AdminTagsComponent {
   }
 
   openCreateModal() {
-    this.modalService.open(TagCreateModalComponent, { centered: true }).result.then((result) => {
-      if (result) {
-        this.refreshData();
-      }
-    });
+    this.modalService.open(TagCreateModalComponent, { centered: true }).result.then(
+      (result) => {
+        if (result) {
+          this.refreshData();
+        }
+      },
+      () => {
+        /* empty */
+      },
+    );
   }
 
   openEditModal(tag: ITag) {

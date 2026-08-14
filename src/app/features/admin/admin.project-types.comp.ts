@@ -59,13 +59,16 @@ export class AdminProjectTypesComponent {
   }
 
   openCreateModal() {
-    this.modalService
-      .open(ProjectTypeCreateModalComponent, { centered: true })
-      .result.then((result) => {
+    this.modalService.open(ProjectTypeCreateModalComponent, { centered: true }).result.then(
+      (result) => {
         if (result) {
           this.refreshData();
         }
-      });
+      },
+      () => {
+        /* empty */
+      },
+    );
   }
 
   openEditModal(projectType: IProjectType) {

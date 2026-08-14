@@ -56,13 +56,16 @@ export class AdminAuthorRolesComponent {
   }
 
   openCreateModal() {
-    this.modalService
-      .open(AuthorRoleCreateModalComponent, { centered: true })
-      .result.then((result) => {
+    this.modalService.open(AuthorRoleCreateModalComponent, { centered: true }).result.then(
+      (result) => {
         if (result) {
           this.refreshData();
         }
-      });
+      },
+      () => {
+        /* empty */
+      },
+    );
   }
 
   openEditModal(authorRole: IAuthorRole) {
