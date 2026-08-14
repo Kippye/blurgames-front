@@ -5,6 +5,7 @@ import { GenreAddModalComponent } from '../genres/genre.add-modal.comp';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { GenreDeleteModalComponent } from '../genres/genre.delete-modal.comp';
+import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
 
 @Component({
   selector: 'app-admin-genres',
@@ -83,10 +84,11 @@ export class AdminGenresComponent {
   }
 
   openEditModal(genre: IGenre) {
-    this.selectedGenre.set({
-      ...genre,
-    });
-    this.modalService.open(GenreAddModalComponent, { centered: true }).result.then(
+    this.selectedGenre.set(genre);
+    const modalRef = this.modalService.open(GenreEditModalComponent, { centered: true });
+    modalRef.componentInstance.itemToEdit = this.selectedGenre();
+
+    modalRef.result.then(
       (result) => {
         if (result) {
           this.refreshData();
