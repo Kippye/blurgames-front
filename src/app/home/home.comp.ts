@@ -75,9 +75,9 @@ import {
   styles: ``,
 })
 export class Home {
+  config = inject(NgbRatingConfig);
   readonly rating = signal(3);
   constructor() {
-    const config = inject(NgbRatingConfig);
-    config.max = 5;
+    this.config.max = 5;
   }
 }

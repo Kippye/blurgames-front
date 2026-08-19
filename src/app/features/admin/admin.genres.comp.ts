@@ -51,7 +51,7 @@ export class AdminGenresComponent {
   ]);
 
   genresResource = rxResource({
-    stream: () => this.genreService.getCollection({ sort: { key: 'genreName' } }),
+    stream: () => this.genreService.getCollection({ sort: [{ property: 'genreName' }] }),
   });
 
   refreshData() {

@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { ApiClient } from './api-client';
 import { IBaseEntity } from '../../base/domain.types';
-import { Filter } from '../../base/filter.types';
+import { FilterNode } from '../../base/filter.types';
 import { Sort } from '../../base/sort.types';
 import { composeUrl, createQuery } from '../../util/url-helpers';
 
@@ -11,10 +11,10 @@ export abstract class ApiCrudService<
   TCreate,
   TUpdate extends IBaseEntity = T,
 > {
-  private readonly api = inject(ApiClient);
+  protected readonly api = inject(ApiClient);
   protected abstract endpoint: string;
 
-  getCollection(options: { filter?: Filter<T>; sort?: Sort<T> } = {}) {
+  getCollection(options: { filter?: FilterNode; sort?: Sort } = {}) {
     const query = createQuery({
       filter: JSON.stringify(options.filter),
       sort: JSON.stringify(options.sort),

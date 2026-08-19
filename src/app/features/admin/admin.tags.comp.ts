@@ -51,7 +51,7 @@ export class AdminTagsComponent {
   ]);
 
   tagsResource = rxResource({
-    stream: () => this.tagService.getCollection({ sort: { key: 'tagName' } }),
+    stream: () => this.tagService.getCollection({ sort: [{ property: 'tagName' }] }),
   });
 
   refreshData() {

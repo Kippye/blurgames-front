@@ -51,7 +51,8 @@ export class AdminProjectTypesComponent {
   ]);
 
   projectTypesResource = rxResource({
-    stream: () => this.projectTypeService.getCollection({ sort: { key: 'projectTypeName' } }),
+    stream: () =>
+      this.projectTypeService.getCollection({ sort: [{ property: 'projectTypeName' }] }),
   });
 
   refreshData() {

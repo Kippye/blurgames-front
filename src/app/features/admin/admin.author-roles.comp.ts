@@ -48,7 +48,7 @@ export class AdminAuthorRolesComponent {
   propertyColumns: TableColumns<IAuthorRole> = new Map([['authorRoleName', 'Name']]);
 
   authorRolesResource = rxResource({
-    stream: () => this.authorRoleService.getCollection({ sort: { key: 'authorRoleName' } }),
+    stream: () => this.authorRoleService.getCollection({ sort: [{ property: 'authorRoleName' }] }),
   });
 
   refreshData() {
