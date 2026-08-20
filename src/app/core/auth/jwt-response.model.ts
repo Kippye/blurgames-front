@@ -22,3 +22,7 @@ export interface RefreshRequest {
   jwt: string;
   refreshToken: string;
 }
+
+export interface LogoutRequest {
+  refreshToken: string;
+}
