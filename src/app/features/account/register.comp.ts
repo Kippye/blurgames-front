@@ -66,6 +66,11 @@ import { ValidationErrorsComponent } from '../validation/validation.errors';
             [control]="form.controls.passwordConfirmation"
             [submitted]="submitted()"
           />
+          @if (registrationError()) {
+            <div class="alert alert-danger">
+              {{ registrationError() }}
+            </div>
+          }
           <div>
             <button type="submit" class="btn btn-primary bg-gradient btn-block w-100 mb-4">
               Register
@@ -76,23 +81,12 @@ import { ValidationErrorsComponent } from '../validation/validation.errors';
     </div>
   `,
   styles: `
-    .ng-valid[required],
-    .ng-valid.required {
-      border-left: 5px solid #42a948;
-    }
-    /* .ng-invalid:not(form) {
-       border-left: 5px solid #a94442;
-    }*/
     .form-group {
       margin-bottom: 1rem;
     }
     label {
       display: block;
       margin-bottom: 0.5rem;
-    }
-    select {
-      width: 100%;
-      padding: 0.5rem;
     }
   `,
 })
@@ -102,17 +96,24 @@ export class RegisterComponent {
   private readonly fb = inject(FormBuilder);
 
   submitted = signal(false);
+  readonly registrationError = signal<string | null>(null);
 
   createPasswordMatchValidator(): ValidatorFn {
     return (group: AbstractControl): ValidationErrors | null => {
-      const password = group.get('password');
-      const confirmation = group.get('passwordConfirmation');
+      const password = group.get('password')!;
+      const confirmation = group.get('passwordConfirmation')!;
 
-      if (password?.value === confirmation?.value) {
+      if (password.value === confirmation.value) {
+        if (confirmation.errors != null) {
+          // Remove only passwords mismatch error
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { passwordsMismatch, ...otherErrors } = confirmation.errors;
+          confirmation?.setErrors(otherErrors);
+        }
         return null;
       }
 
-      confirmation?.setErrors({
+      confirmation.setErrors({
         ...confirmation.errors,
         passwordsMismatch: true,
       });
@@ -142,7 +143,7 @@ export class RegisterComponent {
 
     this.auth.register(this.form.getRawValue()).subscribe({
       next: () => this.router.navigateByUrl('/'),
-      error: (err) => console.error(err),
+      error: (err) => this.registrationError.set(err.message),
     });
   }
 }

@@ -6,7 +6,7 @@ import { AbstractControl } from '@angular/forms';
   template: `
     @if (shouldShow) {
       <div class="invalid-feedback d-block mb-2 mt-0">
-        @for (message of messages; track message) {
+        @for (message of messages; track $index) {
           <div>{{ message }}</div>
         }
       </div>
