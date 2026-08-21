@@ -1,5 +1,5 @@
 import { IBaseEntity } from '../../base/domain.types';
-import { IProjectDetailsUpload } from '../project-details/project-details.types';
+import { IProjectDetails, IProjectDetailsUpload } from '../project-details/project-details.types';
 
 export interface IProject extends IBaseEntity {
   projectTypeId: string;
@@ -33,4 +33,9 @@ export interface IProjectUpload {
   project: IProjectCreate;
   projectDetails: IProjectDetailsUpload;
   authors: IProjectAuthorUpload[];
+}
+
+export interface IProjectJoined {
+  project: IProject;
+  projectDetails: IProjectDetails;
 }

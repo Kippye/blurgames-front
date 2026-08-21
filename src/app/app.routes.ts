@@ -20,6 +20,16 @@ export const routes: Routes = [
       import('./features/account/register.comp').then((m) => m.RegisterComponent),
   },
   {
+    path: 'projects',
+    redirectTo: 'projects/1',
+  },
+  {
+    path: 'projects/:page',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/projects/projects.comp').then((m) => m.ProjectsComponent),
+  },
+  {
     path: 'admin/author-roles',
     redirectTo: 'admin/author-roles/1',
   },

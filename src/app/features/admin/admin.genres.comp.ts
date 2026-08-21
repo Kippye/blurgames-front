@@ -28,7 +28,7 @@ import { Router } from '@angular/router';
         <div class="alert alert-danger">
           {{ genresResource.error()?.message }}
         </div>
-      } @else if (genresResource.stableData(); as data) {
+      } @else if (genresResource.stableValue(); as data) {
         <app-page-selection
           [currentPage]="page()"
           (changePage)="changePage($event)"
@@ -59,7 +59,7 @@ export class AdminGenresComponent {
   selectedItem = signal<IGenre | null>(null);
 
   firstOrderNumber = computed(
-    () => 1 + (this.genresResource.stableData()?.pageSize ?? 0) * (this.page() - 1),
+    () => 1 + (this.genresResource.stableValue()?.pageSize ?? 0) * (this.page() - 1),
   );
 
   propertyColumns: TableColumns<IGenre> = new Map([

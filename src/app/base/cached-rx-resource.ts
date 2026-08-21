@@ -6,7 +6,7 @@ type RxResourceReturn<T, P> = ReturnType<typeof rxResource<T, P>>;
 
 export interface CachedResourceRef<T, P = unknown> extends RxResourceReturn<T, P> {
   /** Last successfully loaded value, kept stable across reloads. `undefined` until the first success. */
-  stableData: Signal<T | undefined>;
+  stableValue: Signal<T | undefined>;
   /** True only while loading the very first value (no data cached yet). */
   isInitialLoading: Signal<boolean>;
 }
@@ -20,19 +20,19 @@ export interface CachedResourceRef<T, P = unknown> extends RxResourceReturn<T, P
 export function cachedRxResource<T, P = unknown>(
   options: RxResourceOptions<T, P>,
 ): CachedResourceRef<T, P> {
-  const stableData = signal<T | undefined>(undefined);
+  const stableValue = signal<T | undefined>(undefined);
 
   const originalStream = options.stream;
   const source = rxResource<T, P>({
     ...options,
     stream: (param) => {
       const result = originalStream(param) as Observable<T>;
-      return result.pipe(tap((value: T) => stableData.set(value)));
+      return result.pipe(tap((value: T) => stableValue.set(value)));
     },
   });
 
   return Object.assign(source, {
-    stableData: stableData,
-    isInitialLoading: computed(() => source.isLoading() && stableData() === undefined),
+    stableValue: stableValue,
+    isInitialLoading: computed(() => source.isLoading() && stableValue() === undefined),
   }) as CachedResourceRef<T, P>;
 }
