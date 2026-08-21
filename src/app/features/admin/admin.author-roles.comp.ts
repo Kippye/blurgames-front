@@ -27,7 +27,7 @@ import { TableColumns, AdminTableComponent } from './admin.table.comp';
       <div>
         <button class="btn btn-primary mb-3" (click)="openCreateModal()">Create</button>
         <app-admin-table
-          [items]="authorRolesResource.value()"
+          [items]="authorRolesResource.value().items"
           [columns]="propertyColumns"
           (editClick)="openEditModal($event)"
           (deleteClick)="openDeleteModal($event)"
@@ -48,7 +48,7 @@ export class AdminAuthorRolesComponent {
   propertyColumns: TableColumns<IAuthorRole> = new Map([['authorRoleName', 'Name']]);
 
   authorRolesResource = rxResource({
-    stream: () => this.authorRoleService.getCollection({ sort: [{ property: 'authorRoleName' }] }),
+    stream: () => this.authorRoleService.getPaged({ sort: [{ property: 'authorRoleName' }] }),
   });
 
   refreshData() {

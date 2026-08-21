@@ -22,7 +22,7 @@ export type TableColumns<T> = Map<keyof T, string>;
         @for (item of items(); track item.id) {
           <tr>
             @if (numberColumn()) {
-              <td class="number-column text-muted">{{ $index + 1 }}</td>
+              <td class="number-column text-muted">{{ startingNumber() + $index }}</td>
             }
             @for (column of columns(); track column[0]) {
               <td>{{ item[column[0]] }}</td>
@@ -46,7 +46,7 @@ export type TableColumns<T> = Map<keyof T, string>;
   `,
   styles: `
     .number-column {
-      width: 1%; /* As small as possible */
+      width: 4%; /* As small as possible to fit 3-digit numbers */
     }
     .actions-column {
       width: fit-content; /* Make it only wide enough for its contents */
@@ -56,6 +56,7 @@ export type TableColumns<T> = Map<keyof T, string>;
 })
 export class AdminTableComponent<T extends IBaseEntity> {
   numberColumn = input(false, { transform: booleanAttribute });
+  startingNumber = input<number>(1);
   items = input.required<T[]>();
   columns = input.required<TableColumns<T>>();
   editClick = output<T>();

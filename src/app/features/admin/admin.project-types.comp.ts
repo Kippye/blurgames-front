@@ -27,7 +27,7 @@ import { AdminTableComponent, TableColumns } from './admin.table.comp';
       <div>
         <button class="btn btn-primary mb-3" (click)="openCreateModal()">Create</button>
         <app-admin-table
-          [items]="projectTypesResource.value()"
+          [items]="projectTypesResource.value().items"
           [columns]="propertyColumns"
           (editClick)="openEditModal($event)"
           (deleteClick)="openDeleteModal($event)"
@@ -51,8 +51,7 @@ export class AdminProjectTypesComponent {
   ]);
 
   projectTypesResource = rxResource({
-    stream: () =>
-      this.projectTypeService.getCollection({ sort: [{ property: 'projectTypeName' }] }),
+    stream: () => this.projectTypeService.getPaged({ sort: [{ property: 'projectTypeName' }] }),
   });
 
   refreshData() {

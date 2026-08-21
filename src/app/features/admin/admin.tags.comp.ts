@@ -27,7 +27,7 @@ import { TableColumns, AdminTableComponent } from './admin.table.comp';
       <div>
         <button class="btn btn-primary mb-3" (click)="openCreateModal()">Create</button>
         <app-admin-table
-          [items]="tagsResource.value()"
+          [items]="tagsResource.value().items"
           [columns]="propertyColumns"
           (editClick)="openEditModal($event)"
           (deleteClick)="openDeleteModal($event)"
@@ -51,7 +51,7 @@ export class AdminTagsComponent {
   ]);
 
   tagsResource = rxResource({
-    stream: () => this.tagService.getCollection({ sort: [{ property: 'tagName' }] }),
+    stream: () => this.tagService.getPaged({ sort: [{ property: 'tagName' }] }),
   });
 
   refreshData() {

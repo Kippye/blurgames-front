@@ -40,9 +40,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       return auth.refresh().pipe(
         // `switchMap` -> switch to a new Observable
         switchMap((res) => next(withToken(req, res.jwt))),
-        // Failed after refresh -> log out and throw
-        catchError((refreshErr) => {
-          auth.logout();
+        catchError((refreshErr: HttpErrorResponse) => {
+          // Still unauthorized after refresh -> log out
+          if (refreshErr.status === 401) {
+            auth.logout();
+          }
+          // Throw other errors out to caller
           return throwError(() => refreshErr);
         }),
       );

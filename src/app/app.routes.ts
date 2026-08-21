@@ -21,24 +21,40 @@ export const routes: Routes = [
   },
   {
     path: 'admin/author-roles',
+    redirectTo: 'admin/author-roles/1',
+  },
+  {
+    path: 'admin/author-roles/:page',
     canActivate: [authGuard, adminGuard],
     loadComponent: () =>
       import('./features/admin/admin.author-roles.comp').then((m) => m.AdminAuthorRolesComponent),
   },
   {
     path: 'admin/genres',
+    redirectTo: 'admin/genres/1',
+  },
+  {
+    path: 'admin/genres/:page',
     canActivate: [authGuard, adminGuard],
     loadComponent: () =>
       import('./features/admin/admin.genres.comp').then((m) => m.AdminGenresComponent),
   },
   {
     path: 'admin/project-types',
+    redirectTo: 'admin/project-types/1',
+  },
+  {
+    path: 'admin/project-types/:page',
     canActivate: [authGuard, adminGuard],
     loadComponent: () =>
       import('./features/admin/admin.project-types.comp').then((m) => m.AdminProjectTypesComponent),
   },
   {
     path: 'admin/tags',
+    redirectTo: 'admin/tags/1',
+  },
+  {
+    path: 'admin/tags/:page',
     canActivate: [authGuard, adminGuard],
     loadComponent: () =>
       import('./features/admin/admin.tags.comp').then((m) => m.AdminTagsComponent),

@@ -4,6 +4,7 @@ import { IBaseEntity } from '../../base/domain.types';
 import { FilterNode } from '../../base/filter.types';
 import { Sort } from '../../base/sort.types';
 import { composeUrl, createQuery } from '../../util/url-helpers';
+import { IPaged, Page } from '../../base/pagination.types';
 
 /** Base API CRUD service for any DTO type. Cannot be injected itself. */
 export abstract class ApiCrudService<
@@ -13,6 +14,17 @@ export abstract class ApiCrudService<
 > {
   protected readonly api = inject(ApiClient);
   protected abstract endpoint: string;
+
+  getPaged(options: { filter?: FilterNode; sort?: Sort; page?: Page } = {}) {
+    const query = createQuery({
+      filter: JSON.stringify(options.filter),
+      sort: JSON.stringify(options.sort),
+      page: options.page?.page ?? undefined,
+      pageSize: options.page?.pageSize ?? undefined,
+    });
+    const url = composeUrl({ endpoint: this.endpoint + '/all', query });
+    return this.api.get<IPaged<T>>(url);
+  }
 
   getCollection(options: { filter?: FilterNode; sort?: Sort } = {}) {
     const query = createQuery({
