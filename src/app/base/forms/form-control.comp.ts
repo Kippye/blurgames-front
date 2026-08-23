@@ -12,7 +12,7 @@ import { booleanAttribute, Component, input } from '@angular/core';
         }
       </label>
     }
-    <ng-content select="input, textarea" />
+    <ng-content select="input, textarea, select, app-search-select-dropdown" />
   </div>`,
   styles: ``,
 })
