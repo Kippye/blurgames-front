@@ -68,7 +68,7 @@ import {
         <ul class="navbar-nav ms-auto">
           <!-- TODO: Admin only -->
           @if (auth.isLoggedIn()) {
-            <div ngbDropdown class="d-inline-block">
+            <li ngbDropdown class="d-inline-block">
               <button
                 id="dropdownAdmin"
                 ngbDropdownToggle
@@ -87,7 +87,7 @@ import {
                 </a>
                 <a ngbDropdownItem routerLink="/admin/tags" class="dropdown-item"> Tags </a>
               </div>
-            </div>
+            </li>
           }
           @if (auth.isLoggedIn()) {
             <li class="nav-item m-2">

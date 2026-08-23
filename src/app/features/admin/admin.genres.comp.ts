@@ -7,14 +7,14 @@ import { GenreDeleteModalComponent } from '../genres/genre.delete-modal.comp';
 import { GenreEditModalComponent } from '../genres/genre.edit-modal.comp';
 import { TableColumns, AdminTableComponent } from './admin.table.comp';
 import { FormsModule, ɵInternalFormsSharedModule } from '@angular/forms';
-import { BaseFormControlComponent } from '../../base/components/page-selection.comp';
+import { PageSelectionComponent } from '../../base/components/page-selection.comp';
 import { IPaged } from '../../base/pagination.types';
 import { cachedRxResource } from '../../base/cached-rx-resource';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-genres',
-  imports: [AdminTableComponent, ɵInternalFormsSharedModule, FormsModule, BaseFormControlComponent],
+  imports: [AdminTableComponent, ɵInternalFormsSharedModule, FormsModule, PageSelectionComponent],
   template: `
     <h1>Genres</h1>
     @if (genresResource.isInitialLoading()) {

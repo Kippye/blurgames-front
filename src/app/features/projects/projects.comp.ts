@@ -1,6 +1,6 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule, ɵInternalFormsSharedModule } from '@angular/forms';
-import { BaseFormControlComponent } from '../../base/components/page-selection.comp';
+import { PageSelectionComponent } from '../../base/components/page-selection.comp';
 import { IPaged } from '../../base/pagination.types';
 import { cachedRxResource } from '../../base/cached-rx-resource';
 import { Router } from '@angular/router';
@@ -15,7 +15,7 @@ import { IProjectDetails } from '../project-details/project-details.types';
   imports: [
     ɵInternalFormsSharedModule,
     FormsModule,
-    BaseFormControlComponent,
+    PageSelectionComponent,
     ProjectsTableComponent,
   ],
   template: `

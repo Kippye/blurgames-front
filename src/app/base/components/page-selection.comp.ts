@@ -20,7 +20,7 @@ import { Component, computed, input, output } from '@angular/core';
   `,
   styles: ``,
 })
-export class BaseFormControlComponent {
+export class PageSelectionComponent {
   currentPage = input.required<number>();
   pageCount = input.required<number>();
   changePage = output<number>();
