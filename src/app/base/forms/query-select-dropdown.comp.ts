@@ -4,6 +4,7 @@ import {
   computed,
   effect,
   ElementRef,
+  forwardRef,
   input,
   model,
   signal,
@@ -11,26 +12,50 @@ import {
 } from '@angular/core';
 import { IBaseEntity } from '../domain.types';
 import { NgbDropdown, NgbDropdownMenu, NgbDropdownAnchor } from '@ng-bootstrap/ng-bootstrap';
-import { FormsModule } from '@angular/forms';
+import {
+  ControlValueAccessor,
+  FormsModule,
+  NG_VALUE_ACCESSOR,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  Observable,
+  of,
+  OperatorFunction,
+  switchMap,
+} from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { IPaged } from '../pagination.types';
+import { cachedRxResource } from '../cached-rx-resource';
 
 @Component({
-  selector: 'app-search-select-dropdown',
-  imports: [FormsModule, NgbDropdown, NgbDropdownMenu, NgbDropdownAnchor],
+  selector: 'app-query-select-dropdown',
+  imports: [FormsModule, NgbDropdown, NgbDropdownMenu, NgbDropdownAnchor, ReactiveFormsModule],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => QuerySelectDropdownComponent),
+      multi: true,
+    },
+  ],
   template: `
     @if (!hideSelected()) {
       <div class="selected-items mb-2">
-        @for (itemId of selectedItemIds(); track itemId) {
+        @for (id_item of selectedItems(); track id_item[0]) {
           <span [class]="itemClass() + ' me-1 md-1 d-inline-flex align-items-center'">
-            {{ itemsById().get(itemId)![nameProperty()] }}
+            {{ id_item[1][nameProperty()] }}
             <button
               type="button"
               class="btn-close btn-close-white ms-1"
-              (click)="removeItem(itemId)"
-              [aria-label]="'Remove' + itemsById().get(itemId)![nameProperty()]"
+              (click)="removeItem(id_item[0])"
+              [aria-label]="'Remove' + id_item[1][nameProperty()]"
             ></button>
           </span>
         }
-        @if (selectedItemIds().length === 0) {
+        @if (selectedItems().size === 0) {
           <span class="text-muted"> None selected </span>
         }
       </div>
@@ -52,6 +77,7 @@ import { FormsModule } from '@angular/forms';
           role="combobox"
           class="form-control"
           autocomplete="off"
+          [disabled]="isDisabled()"
           [(ngModel)]="searchQuery"
           [placeholder]="placeholder()"
           (ngModelChange)="handleQueryEdit()"
@@ -59,14 +85,14 @@ import { FormsModule } from '@angular/forms';
           (keydown.arrowup)="handleMoveSelection($event)"
           (keydown.enter)="handleSubmit($event)"
           (keydown.escape)="handleEscape($event)"
-          [aria-expanded]="dropdownRef().isOpen()"
+          [aria-expanded]="drop.isOpen()"
           [aria-controls]="inputId() + '-menu'"
           [attr.aria-activedescendant]="getOptionId(highlightedItemIndex())"
         />
       </div>
       <div [id]="inputId() + '-menu'" ngbDropdownMenu role="listbox" class="dropdown-menu w-100">
-        @if (searchResultItems().length > 0) {
-          @for (item of searchResultItems(); track item.id) {
+        @if (!searchResults.error() && searchResults.value() !== null) {
+          @for (item of searchResults.value(); track item.id) {
             <button
               [id]="getOptionId($index)"
               tabindex="-1"
@@ -75,15 +101,20 @@ import { FormsModule } from '@angular/forms';
               ngbDropdownItem
               class="dropdown-item no-decoration"
               [class.active]="$index === highlightedItemIndex()"
-              (click)="addItem(item.id)"
+              (click)="addItem(item)"
               (mouseenter)="handleMouseEnterOption($event, $index)"
               [aria-selected]="$index === highlightedItemIndex()"
             >
               <div class="item-name">{{ item[nameProperty()] }}</div>
             </button>
           }
-        } @else {
-          <span ngbDropdownItem class="dropdown-item text-muted">No results found</span>
+          @if (resultCount() === 0) {
+            <span ngbDropdownItem class="dropdown-item text-muted">No results found</span>
+          }
+        } @else if (searchResults.error()) {
+          <span ngbDropdownItem class="dropdown-item text-danger">{{
+            searchResults.error()!.message
+          }}</span>
         }
       </div>
     </div>
@@ -122,14 +153,34 @@ import { FormsModule } from '@angular/forms';
     }
   `,
 })
-export class SearchSelectDropdownComponent<T extends IBaseEntity> {
-  /** Model array of selected item IDs. */
-  readonly selectedItemIds = model.required<string[]>();
+export class QuerySelectDropdownComponent<T extends IBaseEntity> implements ControlValueAccessor {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private onChange = (_: unknown) => {
+    /* */
+  };
+  private onTouched = () => {
+    /* */
+  };
+
+  writeValue(value: Map<string, T>): void {
+    this.selectedItems.set(value);
+  }
+  registerOnChange(fn: (value: unknown) => void): void {
+    this.onChange = fn;
+  }
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+  setDisabledState?(state: boolean): void {
+    this.isDisabled.set(state);
+  }
+
+  readonly fetcher = input.required<(term: string) => Observable<IPaged<T>>>();
+  /** Model Map of [ID, item] for selected items. */
+  readonly selectedItems = model.required<Map<string, T>>();
   readonly multiselect = input(false, { transform: booleanAttribute });
   /** The ID to apply to the input. Should match your label for accessibility. */
   readonly inputId = input.required<string>();
-  /** Readonly list of available items. */
-  readonly items = input<T[]>([]);
   /** The item property key to display in the list. */
   readonly nameProperty = input.required<keyof T>();
   readonly placeholder = input<string>('Search...');
@@ -137,43 +188,43 @@ export class SearchSelectDropdownComponent<T extends IBaseEntity> {
   readonly hideSelected = input(false, { transform: booleanAttribute });
   /** Class string to apply to selected items. */
   readonly itemClass = input<string>('badge bg-primary');
-  /** Maximum number of items to list. */
-  readonly displayLimit = input<number>(5);
 
-  readonly dropdownRef = viewChild.required<NgbDropdown>('drop');
+  private readonly dropdownRef = viewChild.required<NgbDropdown>('drop');
   private readonly dropdownElementRef = viewChild.required<ElementRef<HTMLElement>>('dropEl');
-  readonly searchQuery = signal<string>('');
+  readonly isDisabled = signal<boolean>(false);
   readonly highlightedItemIndex = signal<number>(-1);
+  readonly searchQuery = signal<string>('');
 
-  readonly itemsById = computed((): Map<string, T> => {
-    return new Map<string, T>(this.items().map((item) => [item.id, item]));
+  private readonly query = toObservable(this.searchQuery);
+
+  search: OperatorFunction<string, T[]> = (text$: Observable<string>) =>
+    text$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((term) =>
+        term.trim().length === 0 ? of([]) : this.fetcher()(term).pipe(map((paged) => paged.items)),
+      ),
+    );
+
+  searchResults = cachedRxResource({
+    stream: () => this.query.pipe(this.search),
   });
 
-  readonly availableItems = computed(() => {
-    return this.items().filter((item) => !this.selectedItemIds().includes(item.id));
-  });
-
-  readonly searchResultItems = computed(() => {
-    if (!this.searchQuery()) {
-      return this.availableItems().slice(0, this.displayLimit());
-    }
-    return this.availableItems()
-      .filter((item) =>
-        (item[this.nameProperty()] as string)
-          .toLowerCase()
-          .includes(this.searchQuery().toLowerCase()),
-      )
-      .slice(0, this.displayLimit());
-  });
+  resultCount = computed(() =>
+    this.searchResults.error() ? 0 : (this.searchResults.value()?.length ?? 0),
+  );
 
   // Default highlighted index to top result when search query or items change
   defaultHighlightTopResult = effect(() => {
-    this.highlightedItemIndex.set(this.searchResultItems().length > 0 ? 0 : -1);
+    this.highlightedItemIndex.set(this.resultCount() > 0 ? 0 : -1);
   });
 
   getOptionId(index: number): string | null {
-    return 0 <= index && index < this.searchResultItems().length
-      ? `${this.inputId()}-option-${this.searchResultItems()[index].id}`
+    if (this.searchResults.error()) {
+      return null;
+    }
+    return 0 <= index && index < this.resultCount()
+      ? `${this.inputId()}-option-${this.searchResults.value()![index].id}`
       : null;
   }
 
@@ -182,41 +233,53 @@ export class SearchSelectDropdownComponent<T extends IBaseEntity> {
       return;
     }
     if (state) {
-      this.highlightedItemIndex.set(this.searchResultItems().length > 0 ? 0 : -1);
+      this.highlightedItemIndex.set(this.resultCount() > 0 ? 0 : -1);
       this.dropdownRef().open();
     } else {
       this.dropdownRef().close();
-      this.searchQuery.set('');
       this.highlightedItemIndex.set(-1);
     }
   }
 
-  addItem(itemId: string) {
+  addItem(item: T) {
     if (!this.multiselect()) {
-      this.selectedItemIds.set([itemId]);
+      this.selectedItems.update((selected) => {
+        selected.clear();
+        selected.set(item.id, item);
+        return selected;
+      });
     } else {
-      this.selectedItemIds.update((items) => {
-        return [...items, itemId];
+      this.selectedItems.update((selected) => {
+        selected.set(item.id, item);
+        return selected;
       });
     }
     this.searchQuery.set('');
+    this.onChange(this.selectedItems());
+    this.onTouched();
   }
 
   addHighlightedOrFirstItem() {
-    if (this.dropdownRef().isOpen() === false || this.searchResultItems().length === 0) {
+    if (this.dropdownRef().isOpen() === false || this.resultCount() === 0) {
       return;
     }
 
     const index = this.highlightedItemIndex() < 0 ? 0 : this.highlightedItemIndex();
-    this.addItem(this.searchResultItems()[index]!.id);
+    this.addItem(this.searchResults.value()![index]);
   }
 
   removeItem(itemId: string) {
-    this.selectedItemIds.set(this.selectedItemIds().filter((id) => id !== itemId));
+    this.selectedItems.update((selected) => {
+      selected.delete(itemId);
+      return selected;
+    });
+
+    this.onChange(this.selectedItems());
+    this.onTouched();
   }
 
   moveSelectionIndex(offset: number) {
-    const itemCount = this.searchResultItems().length;
+    const itemCount = this.resultCount();
     if (itemCount === 0) return;
 
     if (!this.dropdownRef().isOpen()) {
@@ -247,7 +310,7 @@ export class SearchSelectDropdownComponent<T extends IBaseEntity> {
   }
 
   handleMouseEnterOption(event: Event, index: number) {
-    if (index < 0 || index >= this.searchResultItems().length) {
+    if (index < 0 || index >= this.resultCount()) {
       return;
     }
     this.highlightedItemIndex.set(index);
