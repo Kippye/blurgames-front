@@ -77,6 +77,21 @@ export class AuthService {
     return this.refreshTracker;
   }
 
+  /** Clear auth info and redirect to login screen. */
+  forgetAuth(): void {
+    if (!this.isLoggedIn()) {
+      return;
+    }
+
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_KEY);
+    localStorage.removeItem(USER_KEY);
+    this.token.set(null);
+    this.refreshToken.set(null);
+    this.user.set(null);
+    this.router.navigateByUrl('/login');
+  }
+
   /** Notify API of logout and clear auth info. */
   logout(): void {
     if (!this.isLoggedIn()) {
@@ -95,13 +110,7 @@ export class AuthService {
     firstValueFrom(
       this.http.post(url, body).pipe(
         tap(() => {
-          localStorage.removeItem(TOKEN_KEY);
-          localStorage.removeItem(REFRESH_KEY);
-          localStorage.removeItem(USER_KEY);
-          this.token.set(null);
-          this.refreshToken.set(null);
-          this.user.set(null);
-          this.router.navigateByUrl('/login');
+          this.forgetAuth();
         }),
       ),
     );

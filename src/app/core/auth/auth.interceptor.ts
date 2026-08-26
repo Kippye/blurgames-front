@@ -38,15 +38,23 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       }
       // 401 -> Refresh and try again
       return auth.refresh().pipe(
-        // `switchMap` -> switch to a new Observable
-        switchMap((res) => next(withToken(req, res.jwt))),
         catchError((refreshErr: HttpErrorResponse) => {
-          // Still unauthorized after refresh -> log out
-          if (refreshErr.status === 401) {
-            auth.logout();
+          // No valid refresh tokens found -> log out
+          if (refreshErr.status === 404) {
+            auth.forgetAuth();
           }
           // Throw other errors out to caller
           return throwError(() => refreshErr);
+        }),
+        // `switchMap` -> switch to a new Observable
+        switchMap((res) => next(withToken(req, res.jwt))),
+        catchError((retryErr: HttpErrorResponse) => {
+          // Still unauthorized after refresh -> log out
+          if (retryErr.status === 401 || retryErr.status === 404) {
+            auth.forgetAuth();
+          }
+          // Throw other errors out to caller
+          return throwError(() => retryErr);
         }),
       );
     }),
