@@ -30,14 +30,14 @@ export const routes: Routes = [
       import('./features/projects/projects.comp').then((m) => m.ProjectsComponent),
   },
   {
-    path: 'admin/author-roles',
-    redirectTo: 'admin/author-roles/1',
+    path: 'upload',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/upload/upload-project.comp').then((m) => m.UploadProjectComponent),
   },
   {
-    path: 'admin/author-roles/:page',
-    canActivate: [authGuard, adminGuard],
-    loadComponent: () =>
-      import('./features/admin/admin.author-roles.comp').then((m) => m.AdminAuthorRolesComponent),
+    path: 'admin/author-roles',
+    redirectTo: 'admin/author-roles/1',
   },
   {
     path: 'admin/genres',

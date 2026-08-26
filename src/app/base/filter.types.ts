@@ -7,6 +7,7 @@ type FilterOperator =
   | 'lt'
   | 'lteq'
   | 'contains'
+  | 'containsExact'
   | 'isIn'
   | 'isNotIn'
   | 'isNull'

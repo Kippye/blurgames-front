@@ -3,7 +3,7 @@ import { booleanAttribute, Component, input } from '@angular/core';
 @Component({
   selector: 'app-form-control',
   imports: [],
-  template: ` <div class="mb-3">
+  template: ` <div>
     @if (label()) {
       <label [htmlFor]="inputId()" class="form-label">
         {{ label() }}
@@ -13,7 +13,7 @@ import { booleanAttribute, Component, input } from '@angular/core';
       </label>
     }
     <ng-content
-      select="input, textarea, select, app-search-select-dropdown, app-query-select-dropdown"
+      select="input, textarea, select, app-search-select-dropdown, app-query-select-dropdown, app-create-project-authors"
     />
   </div>`,
   styles: ``,

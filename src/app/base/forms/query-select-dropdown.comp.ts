@@ -7,6 +7,7 @@ import {
   forwardRef,
   input,
   model,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
@@ -21,14 +22,12 @@ import {
 import {
   debounceTime,
   distinctUntilChanged,
-  map,
   Observable,
   of,
   OperatorFunction,
   switchMap,
 } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { IPaged } from '../pagination.types';
 import { cachedRxResource } from '../cached-rx-resource';
 
 @Component({
@@ -54,8 +53,7 @@ import { cachedRxResource } from '../cached-rx-resource';
               [aria-label]="'Remove' + id_item[1][nameProperty()]"
             ></button>
           </span>
-        }
-        @if (selectedItems().size === 0) {
+        } @empty {
           <span class="text-muted"> None selected </span>
         }
       </div>
@@ -107,8 +105,7 @@ import { cachedRxResource } from '../cached-rx-resource';
             >
               <div class="item-name">{{ item[nameProperty()] }}</div>
             </button>
-          }
-          @if (resultCount() === 0) {
+          } @empty {
             <span ngbDropdownItem class="dropdown-item text-muted">No results found</span>
           }
         } @else if (searchResults.error()) {
@@ -175,9 +172,9 @@ export class QuerySelectDropdownComponent<T extends IBaseEntity> implements Cont
     this.isDisabled.set(state);
   }
 
-  readonly fetcher = input.required<(term: string) => Observable<IPaged<T>>>();
+  readonly fetcher = input.required<(term: string) => Observable<T[]>>();
   /** Model Map of [ID, item] for selected items. */
-  readonly selectedItems = model.required<Map<string, T>>();
+  readonly selectedItems = model<Map<string, T>>(new Map<string, T>());
   readonly multiselect = input(false, { transform: booleanAttribute });
   /** The ID to apply to the input. Should match your label for accessibility. */
   readonly inputId = input.required<string>();
@@ -188,6 +185,13 @@ export class QuerySelectDropdownComponent<T extends IBaseEntity> implements Cont
   readonly hideSelected = input(false, { transform: booleanAttribute });
   /** Class string to apply to selected items. */
   readonly itemClass = input<string>('badge bg-primary');
+  /** Amount of time to debounce between inputs. You can safely set this to 0 if using local data. */
+  readonly debounceMs = input<number>(300);
+  /** Refetch even when input is empty (not recommended when querying remote data) */
+  readonly fetchOnEmptyQuery = input(false, { transform: booleanAttribute });
+
+  readonly selectItem = output<T>();
+  readonly deselectItem = output<T>();
 
   private readonly dropdownRef = viewChild.required<NgbDropdown>('drop');
   private readonly dropdownElementRef = viewChild.required<ElementRef<HTMLElement>>('dropEl');
@@ -199,10 +203,10 @@ export class QuerySelectDropdownComponent<T extends IBaseEntity> implements Cont
 
   search: OperatorFunction<string, T[]> = (text$: Observable<string>) =>
     text$.pipe(
-      debounceTime(300),
+      debounceTime(this.debounceMs()),
       distinctUntilChanged(),
       switchMap((term) =>
-        term.trim().length === 0 ? of([]) : this.fetcher()(term).pipe(map((paged) => paged.items)),
+        term.trim().length > 0 || this.fetchOnEmptyQuery() ? this.fetcher()(term) : of([]),
       ),
     );
 
@@ -237,6 +241,7 @@ export class QuerySelectDropdownComponent<T extends IBaseEntity> implements Cont
       this.dropdownRef().open();
     } else {
       this.dropdownRef().close();
+      this.searchQuery.set('');
       this.highlightedItemIndex.set(-1);
     }
   }
@@ -257,6 +262,7 @@ export class QuerySelectDropdownComponent<T extends IBaseEntity> implements Cont
     this.searchQuery.set('');
     this.onChange(this.selectedItems());
     this.onTouched();
+    this.selectItem.emit(item);
   }
 
   addHighlightedOrFirstItem() {
@@ -269,13 +275,18 @@ export class QuerySelectDropdownComponent<T extends IBaseEntity> implements Cont
   }
 
   removeItem(itemId: string) {
+    let removed: T;
     this.selectedItems.update((selected) => {
-      selected.delete(itemId);
+      if (selected.has(itemId)) {
+        removed = selected.get(itemId)!;
+        selected.delete(itemId);
+      }
       return selected;
     });
 
     this.onChange(this.selectedItems());
     this.onTouched();
+    this.deselectItem.emit(removed!);
   }
 
   moveSelectionIndex(offset: number) {

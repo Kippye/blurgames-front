@@ -1,3 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 /* Import bootstrap icon font */
 @import url('bootstrap-icons/font/bootstrap-icons.css');
+
+.page-title {
+    text-wrap-mode: nowrap;;
+}
+
+app-form-control > div {
+    margin-top: 1em;
+}

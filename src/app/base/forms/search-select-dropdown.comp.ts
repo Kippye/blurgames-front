@@ -6,6 +6,7 @@ import {
   ElementRef,
   input,
   model,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
@@ -29,8 +30,7 @@ import { FormsModule } from '@angular/forms';
               [aria-label]="'Remove' + itemsById().get(itemId)![nameProperty()]"
             ></button>
           </span>
-        }
-        @if (selectedItemIds().length === 0) {
+        } @empty {
           <span class="text-muted"> None selected </span>
         }
       </div>
@@ -65,24 +65,22 @@ import { FormsModule } from '@angular/forms';
         />
       </div>
       <div [id]="inputId() + '-menu'" ngbDropdownMenu role="listbox" class="dropdown-menu w-100">
-        @if (searchResultItems().length > 0) {
-          @for (item of searchResultItems(); track item.id) {
-            <button
-              [id]="getOptionId($index)"
-              tabindex="-1"
-              type="button"
-              role="option"
-              ngbDropdownItem
-              class="dropdown-item no-decoration"
-              [class.active]="$index === highlightedItemIndex()"
-              (click)="addItem(item.id)"
-              (mouseenter)="handleMouseEnterOption($event, $index)"
-              [aria-selected]="$index === highlightedItemIndex()"
-            >
-              <div class="item-name">{{ item[nameProperty()] }}</div>
-            </button>
-          }
-        } @else {
+        @for (item of searchResultItems(); track item.id) {
+          <button
+            [id]="getOptionId($index)"
+            tabindex="-1"
+            type="button"
+            role="option"
+            ngbDropdownItem
+            class="dropdown-item no-decoration"
+            [class.active]="$index === highlightedItemIndex()"
+            (click)="addItem(item.id)"
+            (mouseenter)="handleMouseEnterOption($event, $index)"
+            [aria-selected]="$index === highlightedItemIndex()"
+          >
+            <div class="item-name">{{ item[nameProperty()] }}</div>
+          </button>
+        } @empty {
           <span ngbDropdownItem class="dropdown-item text-muted">No results found</span>
         }
       </div>
@@ -124,7 +122,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class SearchSelectDropdownComponent<T extends IBaseEntity> {
   /** Model array of selected item IDs. */
-  readonly selectedItemIds = model.required<string[]>();
+  readonly selectedItemIds = model<string[]>([]);
   readonly multiselect = input(false, { transform: booleanAttribute });
   /** The ID to apply to the input. Should match your label for accessibility. */
   readonly inputId = input.required<string>();
@@ -139,6 +137,9 @@ export class SearchSelectDropdownComponent<T extends IBaseEntity> {
   readonly itemClass = input<string>('badge bg-primary');
   /** Maximum number of items to list. */
   readonly displayLimit = input<number>(5);
+
+  readonly selectItem = output<T>();
+  readonly deselectItem = output<T>();
 
   readonly dropdownRef = viewChild.required<NgbDropdown>('drop');
   private readonly dropdownElementRef = viewChild.required<ElementRef<HTMLElement>>('dropEl');
@@ -200,6 +201,7 @@ export class SearchSelectDropdownComponent<T extends IBaseEntity> {
       });
     }
     this.searchQuery.set('');
+    this.selectItem.emit(this.itemsById().get(itemId)!);
   }
 
   addHighlightedOrFirstItem() {
@@ -213,6 +215,8 @@ export class SearchSelectDropdownComponent<T extends IBaseEntity> {
 
   removeItem(itemId: string) {
     this.selectedItemIds.set(this.selectedItemIds().filter((id) => id !== itemId));
+    const item = this.itemsById().get(itemId)!;
+    this.deselectItem.emit(item);
   }
 
   moveSelectionIndex(offset: number) {

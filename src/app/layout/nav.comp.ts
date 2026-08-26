@@ -78,9 +78,6 @@ import {
                 Admin
               </button>
               <div ngbDropdownMenu aria-labelledby="dropdownAdmin">
-                <a ngbDropdownItem routerLink="/admin/author-roles" class="dropdown-item">
-                  Author Roles
-                </a>
                 <a ngbDropdownItem routerLink="/admin/genres" class="dropdown-item"> Genres </a>
                 <a ngbDropdownItem routerLink="/admin/project-types" class="dropdown-item">
                   Project Types
