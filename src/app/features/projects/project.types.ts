@@ -1,4 +1,5 @@
 import { IBaseEntity } from '../../base/domain.types';
+import { IProjectAuthorUpload } from '../project-authors/project-author.types';
 import { IProjectDetails, IProjectDetailsUpload } from '../project-details/project-details.types';
 
 export interface IProject extends IBaseEntity {
@@ -17,16 +18,6 @@ export interface IProjectCreate {
 export interface IProjectUpdate extends IBaseEntity {
   projectTypeId: string;
   relatedProjectId?: string;
-}
-
-export interface IProjectAuthorUpload {
-  // Existing author
-  authorId?: string;
-  // OR name of new author
-  name?: string;
-  isNewAuthor: boolean;
-  // Roles that the author has in this project
-  roleIds: string[];
 }
 
 export interface IProjectUpload {
